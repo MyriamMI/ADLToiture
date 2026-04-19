@@ -4,12 +4,28 @@ Application web de gestion pour un couvreur professionnel, développée dans le 
 
 ## Description
 
-ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon (Belgique). Ce projet est une application web SPA (Single Page Application) permettant de :
+ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon (Belgique). Ce projet est une application web SPA permettant de :
 - Présenter les services de l'entreprise au public
 - Recevoir des demandes de rendez-vous en ligne
 - Gérer les rendez-vous, clients et devis via un espace admin privé
 
 > Projet fictif fonctionnel basé sur une entreprise réelle, développé en anticipation de sa reprise d'activité.
+
+## Avancement
+
+| Étape | Statut |
+|-------|--------|
+| Cahier des charges | ✅ Terminé |
+| Maquettes Desktop 1440px — 10 pages | ✅ Terminé |
+| Maquettes iPad paysage 1024px — 10 pages | ✅ Terminé |
+| Maquettes Mobile 390px — 15 frames | ✅ Terminé |
+| Prototypage Figma (navigation) | 🔄 En cours |
+| Développement back-end PHP + MySQL | ⏳ À venir |
+| Développement front-end React | ⏳ À venir |
+| Tests & déploiement | ⏳ À venir |
+
+## Maquettes Figma
+[Voir les maquettes sur Figma](https://www.figma.com/design/6qH3UsrKONycCrwY0e8kcF)
 
 ## Stack technique
 
@@ -53,3 +69,6 @@ mysql -u root -p < database/adltoiture.sql
 
 ## Auteur
 
+**Myriam Mi** — [@MyriamMi](https://github.com/MyriamMi)  
+Formation : IFAPME Développeur Web Front-End — Section X75  
+Formateur : Mohamad Haji | Année 2025-2026
