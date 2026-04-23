@@ -67,14 +67,6 @@ mysql -u root -p < database/adltoiture.sql
 
 ## Structure du projet
 
-
-# Journal de bord – ADLToiture TFE
-
-## 23 avril 2026
-- Résumé de l'état du projet (maquettes Figma terminées, phase prototypage)
-- Mise en place du dépôt GitHub
-- Prochaines étapes : prototypage → développement React
-  
 ## Auteur
 
 **Myriam Mi** — [@MyriamMi](https://github.com/MyriamMi)  
