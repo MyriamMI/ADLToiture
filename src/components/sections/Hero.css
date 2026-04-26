@@ -62,7 +62,7 @@
 
 .hero__btn--primary {
   background-color: var(--color-cream);
-  color: var(--color-primary);
+  color: var(--color-text);
   border: 2px solid var(--color-cream);
 }
 
@@ -75,11 +75,10 @@
 .hero__btn--outline {
   background-color: transparent;
   color: var(--color-white);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  border: 2px solid var(--color-white);
 }
 
 .hero__btn--outline:hover {
-  border-color: var(--color-white);
   background-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
 }
