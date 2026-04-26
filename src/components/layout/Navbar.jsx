@@ -9,7 +9,7 @@ export default function Navbar() {
       <ul className="navbar__links">
         <li><NavLink to="/">Accueil</NavLink></li>
         <li><NavLink to="/services">Services</NavLink></li>
-        <li><NavLink to="/realisations">Réalisations</NavLink></li>
+        <li><NavLink to="/about">À Propos</NavLink></li>
         <li><NavLink to="/contact">Contact</NavLink></li>
       </ul>
     </nav>
