@@ -4,26 +4,27 @@
   z-index: 100;
   background-color: var(--color-white);
   border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
 }
 
 .navbar__container {
+  position: relative;
   max-width: var(--container-max);
+  width: 100%;
   margin: 0 auto;
-  padding: 0 var(--space-6);
+  padding: 0 var(--space-8);
   height: var(--header-height);
   display: flex;
   align-items: center;
-  gap: var(--space-8);
 }
 
-/* ── Logo ── */
+/* ── Logo — left ── */
 .navbar__logo {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   text-decoration: none;
   flex-shrink: 0;
+  z-index: 1;
 }
 
 .navbar__logo-badge {
@@ -47,18 +48,21 @@
   letter-spacing: -0.02em;
 }
 
-/* ── Nav links ── */
+/* ── Nav — absolutely centered ── */
 .navbar__nav {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-8);
   list-style: none;
   margin: 0;
   padding: 0;
+  white-space: nowrap;
 }
 
 .navbar__links a {
@@ -80,9 +84,11 @@
   border-bottom-color: var(--color-primary);
 }
 
-/* ── Phone ── */
+/* ── Phone — right ── */
 .navbar__phone {
   margin-left: auto;
+  flex-shrink: 0;
+  z-index: 1;
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-primary);
@@ -112,6 +118,8 @@
   border: none;
   cursor: pointer;
   flex-shrink: 0;
+  margin-left: auto;
+  z-index: 1;
 }
 
 .navbar__hamburger span {
@@ -124,7 +132,6 @@
   transform-origin: center;
 }
 
-/* Animate to X when open */
 .navbar__hamburger--open span:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -139,7 +146,6 @@
 @media (max-width: 768px) {
   .navbar__hamburger {
     display: flex;
-    margin-left: auto;
   }
 
   .navbar__phone {
@@ -152,10 +158,11 @@
     top: var(--header-height);
     left: 0;
     right: 0;
+    transform: none;
     background-color: var(--color-white);
     border-top: 1px solid var(--color-border);
     box-shadow: var(--shadow-md);
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-4) var(--space-8);
   }
 
   .navbar__nav--open {
@@ -166,6 +173,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0;
+    white-space: normal;
   }
 
   .navbar__links li {
