@@ -19,9 +19,9 @@ ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon
 | Maquettes Desktop 1440px — 10 pages | ✅ Terminé |
 | Maquettes iPad paysage 1024px — 10 pages | ✅ Terminé |
 | Maquettes Mobile 390px — 15 frames | ✅ Terminé |
-| Prototypage Figma (navigation) | 🔄 En cours |
+| Prototypage Figma (navigation) | ✅ Terminé |
 | Développement back-end PHP + MySQL | ⏳ À venir |
-| Développement front-end React | ⏳ À venir |
+| Développement front-end React | 🔄 En cours |
 | Tests & déploiement | ⏳ À venir |
 
 ## Maquettes Figma
@@ -31,18 +31,18 @@ ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon
 
 | Couche | Technologie |
 |--------|-------------|
-| Front-end | React.js + Bootstrap 5.3 |
+| Front-end | React.js + Vite + CSS custom properties |
 | Back-end | PHP (API REST) |
 | Base de données | MySQL |
 | Carte | Leaflet.js + OpenStreetMap |
-| Auth | Sessions PHP |
+| Auth | JWT |
 
 ## Prérequis
 
 - Node.js v18+
 - PHP 8+
 - MySQL 8+
-- XAMPP ou Laragon (en local)
+- WAMP (en local)
 
 ## Installation
 
@@ -52,9 +52,9 @@ git clone https://github.com/MyriamMi/ADLToiture.git
 cd ADLToiture
 
 # Installer les dépendances front-end
-cd client
+cd ADLToiture
 npm install
-npm start
+npm run dev
 
 # Configurer le back-end
 cd ../server
