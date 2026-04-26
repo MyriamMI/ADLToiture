@@ -1,19 +1,21 @@
 :root {
   /* Colors */
-  --color-primary: #c0392b;
-  --color-primary-dark: #96281b;
+  --color-primary: #550101;
+  --color-primary-dark: #3a0101;
   --color-secondary: #2c3e50;
   --color-accent: #e67e22;
 
-  --color-bg: #ffffff;
-  --color-bg-light: #f8f8f8;
+  --color-cream: #fcf4eb;
+  --color-white: #ffffff;
+  --color-bg: #fcf4eb;
+  --color-bg-light: #ffffff;
   --color-bg-dark: #1a1a1a;
 
-  --color-text: #333333;
-  --color-text-light: #666666;
+  --color-text: #1a1a1a;
+  --color-text-muted: rgba(0, 0, 0, 0.5);
   --color-text-inverse: #ffffff;
 
-  --color-border: #e0e0e0;
+  --color-border: #e0d6c8;
 
   /* Typography */
   --font-sans: 'Segoe UI', system-ui, sans-serif;
