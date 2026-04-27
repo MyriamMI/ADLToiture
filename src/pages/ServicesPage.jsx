@@ -102,8 +102,8 @@ export default function ServicesPage() {
         <div className="services-page__container">
           <h2 className="services-page__process-title">Mon intervention en 4 étapes</h2>
           <div className="services-page__steps">
-            {steps.map((step) => (
-              <div key={step.number} className="process-step">
+            {steps.map((step, index) => (
+              <div key={step.number} className="process-step" data-aos="zoom-in" data-aos-delay={index * 100}>
                 <span className="process-step__number">{step.number}</span>
                 <div className="process-step__content">
                   <h3 className="process-step__title">{step.title}</h3>
