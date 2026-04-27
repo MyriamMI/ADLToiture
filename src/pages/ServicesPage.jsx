@@ -18,7 +18,7 @@ const services = [
   },
   {
     title: 'Isolation toiture',
-    description: 'Isolation thermique par l'extérieur ou en sarking pour améliorer votre confort et économiser l'énergie.',
+    description: "Isolation thermique par l'extérieur ou en sarking pour améliorer votre confort et économiser l'énergie.",
     price: '25 €/m²',
   },
   {
@@ -32,13 +32,13 @@ const services = [
     price: '15 €/m²',
   },
   {
-    title: 'Réparation d'urgence',
+    title: "Réparation d'urgence",
     description: 'Intervention rapide pour fuite, tuile cassée ou dégât après tempête, avec bâchage provisoire si nécessaire.',
     price: '80 €',
   },
   {
     title: 'Inspection & diagnostic',
-    description: 'Visite complète de votre toiture avec rapport détaillé de l'état général et recommandations.',
+    description: "Visite complète de votre toiture avec rapport détaillé de l'état général et recommandations.",
     price: 'Gratuit',
   },
 ]
@@ -47,17 +47,17 @@ const steps = [
   {
     number: '01',
     title: 'Diagnostic gratuit',
-    description: 'Prise de contact et visite sur place pour évaluer l'état de votre toiture.',
+    description: "Prise de contact et visite sur place pour évaluer l'état de votre toiture.",
   },
   {
     number: '02',
     title: 'Préparation',
-    description: 'Devis détaillé, commande des matériaux et planification de l'intervention.',
+    description: "Devis détaillé, commande des matériaux et planification de l'intervention.",
   },
   {
     number: '03',
     title: 'Intervention',
-    description: 'Réalisation des travaux dans les règles de l'art, dans le respect des délais convenus.',
+    description: "Réalisation des travaux dans les règles de l'art, dans le respect des délais convenus.",
   },
   {
     number: '04',
