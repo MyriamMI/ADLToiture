@@ -85,8 +85,8 @@ export default function ServicesPage() {
       <section className="services-page__grid-section">
         <div className="services-page__container">
           <div className="services-page__grid">
-            {services.map((service) => (
-              <div key={service.title} className="service-card">
+            {services.map((service, index) => (
+              <div key={service.title} className="service-card" data-aos="fade-up" data-aos-delay={index * 75}>
                 <div className="service-card__icon" aria-hidden="true" />
                 <h3 className="service-card__title">{service.title}</h3>
                 <p className="service-card__description">{service.description}</p>
