@@ -5,14 +5,18 @@ export default function Hero() {
   return (
     <section className="hero">
       <div className="hero__container">
-
         <div className="hero__content">
           <h1 className="hero__title">
-            Expert couvreur<br />en toiture
+            Expert couvreur
+            <br />
+            en toiture
           </h1>
           <p className="hero__subtitle">
-            Artisan couvreur basé en Brabant wallon.<br />
-            Pose, rénovation, zinguerie, isolation.
+            Artisan couvreur basé en Brabant wallon.
+            <br />
+            Pose, rénovation, zinguerie, isolation et entretien <br/>
+              J'interviens
+            sur tous types de toitures
           </p>
           <div className="hero__actions">
             <Link to="/contact" className="hero__btn hero__btn--primary">
@@ -27,8 +31,7 @@ export default function Hero() {
         <div className="hero__image">
           <div className="hero__image-placeholder" aria-hidden="true" />
         </div>
-
       </div>
     </section>
-  )
+  );
 }
