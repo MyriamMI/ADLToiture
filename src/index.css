@@ -14,10 +14,10 @@ html {
 
 body {
   font-family: system-ui, sans-serif;
-  font-size: var(--text-base);
+  font-size: 0.9375rem;
   color: var(--color-text);
   background-color: var(--color-cream);
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 

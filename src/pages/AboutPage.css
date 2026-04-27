@@ -83,7 +83,7 @@
 .stat-item__value {
   font-size: var(--text-4xl);
   font-weight: 700;
-  color: var(--color-white);
+  color: #ffffff;
   line-height: 1;
   letter-spacing: -0.02em;
 }
