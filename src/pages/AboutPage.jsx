@@ -48,8 +48,8 @@ export default function AboutPage() {
       <section className="about-page__stats">
         <div className="about-page__container">
           <div className="about-page__stats-grid">
-            {stats.map((stat) => (
-              <div key={stat.label} className="stat-item">
+            {stats.map((stat, index) => (
+              <div key={stat.label} className="stat-item" data-aos="fade-up" data-aos-delay={index * 100}>
                 <span className="stat-item__value" style={{ color: '#ffffff' }}>{stat.value}</span>
                 <span className="stat-item__label" style={{ color: 'rgba(255,255,255,0.75)' }}>{stat.label}</span>
               </div>
