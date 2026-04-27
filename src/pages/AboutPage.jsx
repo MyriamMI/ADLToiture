@@ -50,8 +50,8 @@ export default function AboutPage() {
           <div className="about-page__stats-grid">
             {stats.map((stat) => (
               <div key={stat.label} className="stat-item">
-                <span className="stat-item__value">{stat.value}</span>
-                <span className="stat-item__label">{stat.label}</span>
+                <span className="stat-item__value" style={{ color: '#ffffff' }}>{stat.value}</span>
+                <span className="stat-item__label" style={{ color: 'rgba(255,255,255,0.75)' }}>{stat.label}</span>
               </div>
             ))}
           </div>
