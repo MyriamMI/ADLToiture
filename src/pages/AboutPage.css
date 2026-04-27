@@ -1,0 +1,228 @@
+/* ── Hero ── */
+.about-page__hero {
+  background-color: var(--color-primary);
+  padding: var(--space-16) var(--space-8);
+}
+
+.about-page__hero-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.about-page__hero-title {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--color-white);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.about-page__hero-subtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+/* ── Shared ── */
+.about-page__container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+}
+
+.about-page__section-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-6);
+}
+
+.about-page__section-title--center {
+  text-align: center;
+  margin-bottom: var(--space-10);
+}
+
+.about-page__text {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+/* ── Stats bar ── */
+.about-page__stats {
+  background-color: var(--color-primary);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: var(--space-8) 0;
+}
+
+.about-page__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.stat-item:last-child {
+  border-right: none;
+}
+
+.stat-item__value {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-item__label {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Parcours ── */
+.about-page__parcours {
+  background-color: var(--color-cream);
+  padding: var(--space-20) 0;
+}
+
+.about-page__two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-16);
+}
+
+.about-page__parcours-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.about-page__parcours-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-page__image-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+/* ── Values ── */
+.about-page__values {
+  background-color: var(--color-white);
+  padding: var(--space-20) 0;
+}
+
+.about-page__values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+.value-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background-color: var(--color-cream);
+  border-radius: var(--radius-lg);
+}
+
+.value-card__icon {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-border);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.value-card__title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.value-card__description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+  .about-page__hero-title {
+    font-size: var(--text-3xl);
+  }
+
+  .about-page__values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .about-page__hero {
+    padding: var(--space-12) var(--space-6);
+  }
+
+  .about-page__hero-title {
+    font-size: var(--text-2xl);
+  }
+
+  .about-page__container {
+    padding: 0 var(--space-6);
+  }
+
+  .about-page__stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-item:nth-child(2) {
+    border-right: none;
+  }
+
+  .stat-item:nth-child(1),
+  .stat-item:nth-child(2) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .about-page__parcours,
+  .about-page__values {
+    padding: var(--space-12) 0;
+  }
+
+  .about-page__two-col {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .about-page__parcours-image {
+    order: -1;
+  }
+
+  .about-page__image-placeholder {
+    aspect-ratio: 16 / 9;
+  }
+
+  .about-page__values-grid {
+    grid-template-columns: 1fr;
+  }
+}
