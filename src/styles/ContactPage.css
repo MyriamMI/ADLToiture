@@ -1,7 +1,12 @@
 /* ── Hero ── */
 .contact-page__hero {
+  /* En-tête de la page contact */
   background-color: var(--color-primary);
   padding: var(--space-16) var(--space-8);
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
 }
 
 .contact-page__hero-container {
@@ -36,8 +41,13 @@
 
 /* ── Cartes info ── */
 .contact-page__info {
+  /* Cartes d'informations de contact */
   background-color: var(--color-cream);
   padding: var(--space-12) 0;
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
 }
 
 .contact-page__info-grid {
@@ -79,8 +89,13 @@
 
 /* ── Section deux colonnes ── */
 .contact-page__main {
+  /* Section principale formulaire et FAQ */
   background-color: var(--color-white);
   padding: var(--space-16) 0;
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
 }
 
 .contact-page__two-col {

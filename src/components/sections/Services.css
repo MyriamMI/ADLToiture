@@ -1,5 +1,8 @@
 .services {
+  /* Section Mon métier */
   background-color: var(--color-cream);
+  min-height: 100vh;
+  scroll-snap-align: start;
 }
 
 .services__container {

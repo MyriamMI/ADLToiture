@@ -1,8 +1,10 @@
 .hero {
+  /* Section d'accroche principale */
   background-color: var(--color-primary);
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
+  scroll-snap-align: start;
 }
 
 .hero__container {

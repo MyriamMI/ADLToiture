@@ -6,7 +6,11 @@ import 'aos/dist/aos.css'
 import './index.css'
 import App from './App.jsx'
 
-AOS.init({ duration: 700, once: true })
+AOS.init({
+  duration: 800,
+  once: true,
+  offset: 100,
+})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

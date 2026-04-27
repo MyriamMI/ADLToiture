@@ -1,7 +1,12 @@
 /* ── Hero header ── */
 .services-page__hero {
+  /* En-tête de la page services */
   background-color: var(--color-primary);
   padding: var(--space-16) var(--space-8);
+  min-height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
 }
 
 .services-page__hero-container {
@@ -36,8 +41,11 @@
 
 /* ── Cards grid ── */
 .services-page__grid-section {
+  /* Grille des cartes de services */
   background-color: var(--color-cream);
   padding: var(--space-16) 0;
+  min-height: 100vh;
+  scroll-snap-align: start;
 }
 
 .services-page__grid {
@@ -98,8 +106,11 @@
 
 /* ── Process steps ── */
 .services-page__process {
+  /* Section étapes d'intervention */
   background-color: var(--color-white);
   padding: var(--space-16) 0;
+  min-height: 100vh;
+  scroll-snap-align: start;
 }
 
 .services-page__process-title {
