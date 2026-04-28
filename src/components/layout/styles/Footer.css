@@ -73,3 +73,16 @@
     padding: var(--space-6);
   }
 }
+/* Lien admin discret dans le footer */
+.admin-link {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.75rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-link:hover {
+  color: rgba(255, 255, 255, 0.6);
+}

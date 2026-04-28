@@ -1,0 +1,219 @@
+/* Variables locales à la page de connexion */
+.login-page {
+  --primary: #550101;
+  --primary-dark: #3a0101;
+  --cream: #fcf4eb;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* ── Colonne gauche — identité de marque ── */
+.login-page__brand {
+  background-color: var(--primary);
+  display: flex;
+  flex-direction: column;
+  padding: 3rem;
+  position: relative;
+}
+
+.login-page__brand-top {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+/* Badge logo ADL */
+.login-page__logo {
+  width: 56px;
+  height: 56px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.login-page__brand-name {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.login-page__brand-tagline {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* Lien retour au site — ancré en bas */
+.login-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  margin-top: auto;
+}
+
+.login-page__back:hover {
+  color: #ffffff;
+}
+
+/* ── Colonne droite — formulaire ── */
+.login-page__form-wrapper {
+  background-color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.login-page__card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.login-page__card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.375rem;
+}
+
+.login-page__card-subtitle {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 2rem;
+}
+
+/* ── Formulaire ── */
+.login-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.login-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.login-page__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.login-page__input {
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid #e0d6c8;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-page__input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(85, 1, 1, 0.1);
+}
+
+.login-page__input::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Lien mot de passe oublié */
+.login-page__forgot {
+  align-self: flex-end;
+  font-size: 0.8125rem;
+  color: #2563eb;
+  text-decoration: none;
+  margin-top: -0.5rem;
+}
+
+.login-page__forgot:hover {
+  text-decoration: underline;
+}
+
+/* Bouton Se Connecter */
+.login-page__submit {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--primary);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 0.25rem;
+}
+
+.login-page__submit:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.login-page__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Message d'erreur */
+.login-page__error {
+  font-size: 0.875rem;
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Mobile — colonne unique ── */
+@media (max-width: 768px) {
+  .login-page {
+    grid-template-columns: 1fr;
+    background-color: var(--primary);
+  }
+
+  /* Masquer la colonne gauche sur mobile */
+  .login-page__brand {
+    display: none;
+  }
+
+  .login-page__form-wrapper {
+    background-color: transparent;
+    align-items: flex-start;
+    padding: 2rem 1.5rem;
+    padding-top: 3rem;
+  }
+
+  .login-page__card {
+    max-width: 100%;
+  }
+}

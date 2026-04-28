@@ -1,10 +1,9 @@
-import '../../styles/Footer.css'
+import "./styles/Footer.css";
 
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer__container">
-
         <div className="footer__col">
           <h3 className="footer__heading">Contact</h3>
           <ul className="footer__list">
@@ -35,12 +34,14 @@ export default function Footer() {
             <li>Entretien</li>
           </ul>
         </div>
-
       </div>
 
       <div className="footer__bottom">
+        <a href="/admin/login" className="admin-link">
+          Admin
+        </a>
         <p>&copy; 2026 ADLToiture. Tous droits réservés.</p>
       </div>
     </footer>
-  )
+  );
 }

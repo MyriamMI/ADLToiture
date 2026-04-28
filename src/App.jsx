@@ -1,22 +1,28 @@
-import { Routes, Route, Outlet } from 'react-router-dom'
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
+import ProtectedRoute from './components/ProtectedRoute'
+import AdminLayout from './components/layout/AdminLayout'
 
-// Public pages
+/* Pages publiques */
 import Home from './pages/Home'
 import ServicesPage from './pages/ServicesPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 
-// Admin pages
-import Login from './pages/admin/Login'
-import Dashboard from './pages/admin/Dashboard'
-import Appointments from './pages/admin/Appointments'
-import Clients from './pages/admin/Clients'
-import Quotes from './pages/admin/Quotes'
-import Reviews from './pages/admin/Reviews'
-import Stats from './pages/admin/Stats'
+/* Page de connexion — accès public */
+import LoginPage from './pages/admin/LoginPage'
 
+/* Pages d'administration — accès protégé */
+import DashboardPage from './pages/admin/DashboardPage'
+import RendezVousPage from './pages/admin/RendezVousPage'
+import ClientsPage from './pages/admin/ClientsPage'
+import DevisPage from './pages/admin/DevisPage'
+import DevisCalculateurPage from './pages/admin/DevisCalculateurPage'
+import AvisFaqPage from './pages/admin/AvisFaqPage'
+import StatistiquesPage from './pages/admin/StatistiquesPage'
+
+/* Mise en page publique — avec en-tête et pied de page */
 function PublicLayout() {
   return (
     <>
@@ -30,7 +36,7 @@ function PublicLayout() {
 function App() {
   return (
     <Routes>
-      {/* Public routes — with Header & Footer */}
+      {/* ── Routes publiques — avec Header et Footer ── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/services" element={<ServicesPage />} />
@@ -38,14 +44,28 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
       </Route>
 
-      {/* Admin routes — standalone, no Header/Footer */}
-      <Route path="/admin" element={<Login />} />
-      <Route path="/admin/dashboard" element={<Dashboard />} />
-      <Route path="/admin/appointments" element={<Appointments />} />
-      <Route path="/admin/clients" element={<Clients />} />
-      <Route path="/admin/quotes" element={<Quotes />} />
-      <Route path="/admin/reviews" element={<Reviews />} />
-      <Route path="/admin/stats" element={<Stats />} />
+      {/* ── Page de connexion — accessible sans authentification ── */}
+      <Route path="/admin/login" element={<LoginPage />} />
+
+      {/* ── Routes d'administration — protégées + mise en page avec barre latérale ── */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Redirection de /admin vers le tableau de bord */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+        <Route path="/admin/dashboard"    element={<DashboardPage />} />
+        <Route path="/admin/appointments" element={<RendezVousPage />} />
+        <Route path="/admin/clients"      element={<ClientsPage />} />
+        <Route path="/admin/quotes"       element={<DevisPage />} />
+        <Route path="/admin/devis/calculateur" element={<DevisCalculateurPage />} />
+        <Route path="/admin/reviews"      element={<AvisFaqPage />} />
+        <Route path="/admin/stats"        element={<StatistiquesPage />} />
+      </Route>
     </Routes>
   )
 }

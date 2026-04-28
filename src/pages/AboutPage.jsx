@@ -1,4 +1,4 @@
-import './AboutPage.css'
+import './styles/AboutPage.css'
 
 const stats = [
   { value: '15+', label: "Années d'expérience" },

@@ -1,0 +1,522 @@
+/* ══════════════════════════════
+   Avis & FAQ — page admin
+══════════════════════════════ */
+.af-page {
+  padding: 2rem;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* ── Section wrapper ── */
+.af-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── En-tête de section ── */
+.af-section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.af-section__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.af-section__subtitle {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 0.125rem;
+}
+
+/* ══════════════════════════════
+   Boutons génériques
+══════════════════════════════ */
+.af-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+
+.af-btn--primary {
+  background-color: #550101;
+  color: #ffffff;
+  border-color: #550101;
+}
+
+.af-btn--primary:hover {
+  background-color: #3a0101;
+}
+
+.af-btn--ghost {
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  border-color: #e0d6c8;
+}
+
+.af-btn--ghost:hover {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.af-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════════════
+   Onglets de filtre
+══════════════════════════════ */
+.af-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid #f0ede8;
+  padding-bottom: 0;
+}
+
+.af-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.45);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: -1px;
+}
+
+.af-tab:hover {
+  color: #1a1a1a;
+}
+
+.af-tab--active {
+  color: #550101;
+  border-bottom-color: #550101;
+}
+
+.af-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background-color: #fde8e8;
+  color: #991b1b;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* ══════════════════════════════
+   Tableau
+══════════════════════════════ */
+.af-table-wrap {
+  background-color: #ffffff;
+  border: 1px solid #f0ede8;
+  border-radius: 10px;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.af-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 600px;
+}
+
+.af-table thead th {
+  padding: 0.625rem 1rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background-color: #fafafa;
+  white-space: nowrap;
+  border-bottom: 1px solid #f0ede8;
+}
+
+.af-table tbody tr {
+  border-top: 1px solid #f8f5f0;
+  transition: background-color 0.1s ease;
+}
+
+.af-table tbody tr:hover {
+  background-color: #fdfaf7;
+}
+
+.af-table tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.af-table__empty {
+  text-align: center;
+  padding: 2rem !important;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 0.875rem;
+}
+
+/* ── Cellule client ── */
+.af-client {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 140px;
+}
+
+.af-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #fde8e8;
+  color: #550101;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.af-client__name {
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+/* ── Texte avis tronqué ── */
+.af-avis-text {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+/* ── Date ── */
+.af-date {
+  white-space: nowrap;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 0.8125rem;
+}
+
+/* ══════════════════════════════
+   Étoiles
+══════════════════════════════ */
+.af-stars {
+  display: inline-flex;
+  gap: 1px;
+  font-size: 0.9375rem;
+}
+
+.af-star--on {
+  color: #f59e0b;
+}
+
+.af-star--off {
+  color: #e5e7eb;
+}
+
+/* ══════════════════════════════
+   Badges statut avis
+══════════════════════════════ */
+.af-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.af-badge--valid {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.af-badge--pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* ══════════════════════════════
+   Badges catégorie FAQ
+══════════════════════════════ */
+.af-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.af-cat-badge--services {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.af-cat-badge--devis {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
+.af-cat-badge--zone {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.af-cat-badge--urgences {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.af-cat-badge--garanties {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* ══════════════════════════════
+   Actions (boutons icônes)
+══════════════════════════════ */
+.af-actions {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.af-action-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.af-action-btn--validate {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.af-action-btn--validate:hover {
+  background-color: #a7f3d0;
+}
+
+.af-action-btn--edit {
+  background-color: #ede9fe;
+  color: #5b21b6;
+}
+
+.af-action-btn--edit:hover {
+  background-color: #ddd6fe;
+}
+
+.af-action-btn--delete {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-size: 1.125rem;
+}
+
+.af-action-btn--delete:hover {
+  background-color: #fecaca;
+}
+
+/* ══════════════════════════════
+   FAQ — cellules spécifiques
+══════════════════════════════ */
+.af-faq-question {
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+
+.af-faq-reponse {
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+/* ══════════════════════════════
+   Modal FAQ
+══════════════════════════════ */
+.af-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.af-modal__dialog {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: af-modal-in 0.2s ease;
+}
+
+@keyframes af-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.af-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background-color: #550101;
+  border-radius: 12px 12px 0 0;
+  flex-shrink: 0;
+}
+
+.af-modal__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.af-modal__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+}
+
+.af-modal__close:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.af-modal__body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.af-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f0ede8;
+  flex-shrink: 0;
+}
+
+/* ── Champs de formulaire ── */
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.af-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.af-input {
+  padding: 0.5625rem 0.75rem;
+  border: 1.5px solid #e0d6c8;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  width: 100%;
+}
+
+.af-input:focus {
+  border-color: #550101;
+  box-shadow: 0 0 0 3px rgba(85, 1, 1, 0.1);
+}
+
+.af-textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.af-select {
+  cursor: pointer;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .af-page {
+    padding: 1.25rem 1rem;
+    gap: 2rem;
+  }
+
+  .af-section__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .af-client__name {
+    display: none;
+  }
+
+  .af-table {
+    min-width: 480px;
+  }
+}

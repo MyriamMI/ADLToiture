@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import '../styles/ContactPage.css'
+import './styles/ContactPage.css'
 
 /* -- Correction icône Leaflet par défaut (CDN) -- */
 delete L.Icon.Default.prototype._getIconUrl

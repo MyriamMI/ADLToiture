@@ -2,11 +2,6 @@
 .services-page__hero {
   /* En-tête de la page services */
   background-color: var(--color-primary);
-  padding: var(--space-16) var(--space-8);
-  min-height: 100vh;
-  scroll-snap-align: start;
-  display: flex;
-  align-items: center;
 }
 
 .services-page__hero-container {
@@ -14,6 +9,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  padding: var(--space-16) var(--space-8);
   gap: var(--space-4);
 }
 
@@ -28,7 +24,6 @@
 .services-page__hero-subtitle {
   font-size: var(--text-lg);
   color: rgba(255, 255, 255, 0.8);
-  max-width: 600px;
   line-height: 1.6;
 }
 
@@ -44,8 +39,6 @@
   /* Grille des cartes de services */
   background-color: var(--color-cream);
   padding: var(--space-16) 0;
-  min-height: 100vh;
-  scroll-snap-align: start;
 }
 
 .services-page__grid {
@@ -62,7 +55,9 @@
   flex-direction: column;
   gap: var(--space-3);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition:
+    box-shadow var(--transition),
+    transform var(--transition);
 }
 
 .service-card:hover {
@@ -109,8 +104,6 @@
   /* Section étapes d'intervention */
   background-color: var(--color-white);
   padding: var(--space-16) 0;
-  min-height: 100vh;
-  scroll-snap-align: start;
 }
 
 .services-page__process-title {
@@ -130,7 +123,7 @@
 }
 
 .services-page__steps::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 28px;
   left: calc(12.5% + var(--space-4));

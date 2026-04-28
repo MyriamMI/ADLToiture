@@ -1,8 +1,6 @@
 .cta {
   /* Section CTA appel à l'action */
   background-color: var(--color-primary);
-  min-height: 100vh;
-  scroll-snap-align: start;
 }
 
 .cta__container {

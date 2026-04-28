@@ -1,4 +1,4 @@
-import './Services.css'
+import './styles/Services.css'
 
 const services = [
   'Pose de toiture neuve',

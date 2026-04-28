@@ -1,0 +1,727 @@
+/* ══════════════════════════════
+   Page Clients
+══════════════════════════════ */
+.cli-page {
+  padding: 2rem;
+  max-width: 1100px;
+}
+
+/* ── En-tête de page ── */
+.cli-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cli-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+/* Bouton principal */
+.cli-page__new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  background-color: #550101;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.cli-page__new-btn:hover {
+  background-color: #3a0101;
+  transform: translateY(-1px);
+}
+
+/* ── Barre de recherche ── */
+.cli-search-wrap {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.cli-search-wrap::before {
+  content: '🔍';
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.cli-search {
+  width: 100%;
+  max-width: 360px;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border: 1.5px solid #e0d6c8;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.cli-search:focus {
+  border-color: #550101;
+  box-shadow: 0 0 0 3px rgba(85, 1, 1, 0.1);
+}
+
+.cli-search::placeholder {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* ── Onglets de filtre ── */
+.cli-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.cli-tab {
+  padding: 0.375rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid #e0d6c8;
+  background-color: #ffffff;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.cli-tab:hover:not(.cli-tab--active) {
+  border-color: #550101;
+  color: #550101;
+}
+
+.cli-tab--active {
+  background-color: #550101;
+  border-color: #550101;
+  color: #ffffff;
+}
+
+.cli-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  margin-left: 0.375rem;
+  padding: 0 0.25rem;
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.cli-tab:not(.cli-tab--active) .cli-tab__count {
+  background-color: #f0ede8;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* ══════════════════════════════
+   Tableau — bureau
+══════════════════════════════ */
+.cli-table-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.cli-table-wrap {
+  overflow-x: auto;
+}
+
+.cli-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.cli-table thead th {
+  padding: 0.625rem 1.25rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background-color: #fafafa;
+  white-space: nowrap;
+}
+
+.cli-table tbody tr {
+  border-top: 1px solid #f5f2ee;
+  transition: background-color 0.15s ease;
+}
+
+.cli-table tbody tr:hover {
+  background-color: #fafaf9;
+}
+
+.cli-table tbody td {
+  padding: 0.875rem 1.25rem;
+  color: #1a1a1a;
+  vertical-align: middle;
+}
+
+.cli-table__empty {
+  text-align: center;
+  padding: 3rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 0.875rem;
+}
+
+/* Bouton icône info */
+.cli-info-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+}
+
+.cli-info-btn:hover {
+  background-color: #f5f0ec;
+  color: #550101;
+}
+
+/* ══════════════════════════════
+   Cartes — mobile
+══════════════════════════════ */
+.cli-cards {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cli-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1rem 1.125rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.cli-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cli-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cli-card__name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cli-card__meta {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 0.125rem;
+}
+
+/* ══════════════════════════════
+   Utilitaires partagés
+══════════════════════════════ */
+.table-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: #550101;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.table-client {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.table-client__name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge--pending    { background-color: #fff3cd; color: #92600a; }
+.status-badge--confirmed  { background-color: #d1fae5; color: #065f46; }
+.status-badge--cancelled  { background-color: #fee2e2; color: #991b1b; }
+.status-badge--new        { background-color: #e0e7ff; color: #3730a3; }
+.status-badge--active     { background-color: #d1fae5; color: #065f46; }
+.status-badge--done       { background-color: #e5e7eb; color: #374151; }
+
+/* ══════════════════════════════
+   Panneau de détail client
+   Bureau : modal centré
+   Mobile : tiroir glissant depuis la droite
+══════════════════════════════ */
+@keyframes cli-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cli-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cli-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Fond de la modal */
+.cli-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: cli-fade 0.15s ease;
+}
+
+/* Panneau de détail */
+.cli-detail__panel {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  animation: cli-slide-up 0.15s ease;
+}
+
+/* En-tête du panneau — avatar + nom + statut */
+.cli-detail__head {
+  background-color: #fafaf8;
+  padding: 1.5rem 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid #f0ede8;
+}
+
+/* Grand avatar initiales dans le détail */
+.cli-detail__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #550101;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.cli-detail__name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
+}
+
+/* Bouton de fermeture × */
+.cli-detail__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: #f0ede8;
+  color: rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.cli-detail__close:hover {
+  background-color: #e0d6c8;
+  color: #1a1a1a;
+}
+
+/* Corps — liste d'informations */
+.cli-detail__body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Ligne d'information */
+.cli-detail__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.cli-detail__row-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  margin-top: 0.125rem;
+}
+
+.cli-detail__row-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 0.2rem;
+}
+
+.cli-detail__row-value {
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Séparateur */
+.cli-detail__divider {
+  border: none;
+  border-top: 1px solid #f0ede8;
+  margin: 0;
+}
+
+/* Notes (multilignes) */
+.cli-detail__notes {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Pied du panneau — actions */
+.cli-detail__footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f0ede8;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cli-detail__delete-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  color: #991b1b;
+  border: 1.5px solid #fecaca;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  font-family: inherit;
+}
+
+.cli-detail__delete-btn:hover {
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.cli-detail__edit-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background-color: #550101;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.cli-detail__edit-btn:hover {
+  background-color: #3a0101;
+}
+
+/* ══════════════════════════════
+   Modal formulaire — Nouveau / Modifier client
+══════════════════════════════ */
+@keyframes cli-modal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes cli-modal-slide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cli-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: cli-modal-fade 0.15s ease;
+}
+
+.cli-modal__dialog {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: cli-modal-slide 0.15s ease;
+  max-height: calc(100vh - 2rem);
+  display: flex;
+  flex-direction: column;
+}
+
+/* En-tête rouge foncé */
+.cli-modal__header {
+  background-color: #550101;
+  padding: 1.125rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.cli-modal__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.cli-modal__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.cli-modal__close:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Corps du formulaire */
+.cli-modal__body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cli-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.cli-modal__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cli-modal__input,
+.cli-modal__select,
+.cli-modal__textarea {
+  padding: 0.5625rem 0.75rem;
+  border: 1.5px solid #e0d6c8;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  width: 100%;
+}
+
+.cli-modal__input:focus,
+.cli-modal__select:focus,
+.cli-modal__textarea:focus {
+  border-color: #550101;
+  box-shadow: 0 0 0 3px rgba(85, 1, 1, 0.1);
+}
+
+.cli-modal__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Pied de modal */
+.cli-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f0ede8;
+  flex-shrink: 0;
+}
+
+.cli-modal__cancel {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.55);
+  border: 1.5px solid #e0d6c8;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  font-family: inherit;
+}
+
+.cli-modal__cancel:hover {
+  border-color: #1a1a1a;
+  color: #1a1a1a;
+}
+
+.cli-modal__submit {
+  padding: 0.5rem 1.125rem;
+  background-color: #550101;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: inherit;
+}
+
+.cli-modal__submit:hover {
+  background-color: #3a0101;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .cli-page {
+    padding: 1.25rem 1rem;
+  }
+
+  .cli-search {
+    max-width: 100%;
+  }
+
+  /* Masquer le tableau — afficher les cartes */
+  .cli-table-card {
+    display: none;
+  }
+
+  .cli-cards {
+    display: flex;
+  }
+
+  /* Tiroir glissant depuis la droite */
+  .cli-detail {
+    align-items: stretch;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .cli-detail__panel {
+    max-width: 88%;
+    max-height: 100%;
+    border-radius: 16px 0 0 16px;
+    animation: cli-slide-in-right 0.2s ease;
+  }
+
+  .cli-modal__dialog {
+    max-width: 100%;
+  }
+}
