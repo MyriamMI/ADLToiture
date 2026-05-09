@@ -1,0 +1,106 @@
+/* ── Hero ── */
+.politique-page__hero {
+  background-color: var(--color-primary);
+}
+
+.politique-page__hero-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-16) var(--space-8);
+  gap: var(--space-4);
+}
+
+.politique-page__hero-title {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.politique-page__hero-subtitle {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  max-width: 680px;
+}
+
+/* ── Conteneur ── */
+.politique-page__container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  width: 100%;
+}
+
+/* ── Section contenu ── */
+.politique-page__content {
+  background-color: var(--color-white);
+  padding: var(--space-16) 0;
+}
+
+.politique-page__intro {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-12);
+  font-style: italic;
+}
+
+.politique-page__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+/* ── Bloc de section ── */
+.politique-section {
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-6);
+}
+
+.politique-section__title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.01em;
+}
+
+.politique-section__text {
+  font-size: var(--text-base);
+  color: var(--color-text);
+  line-height: 1.7;
+  margin-bottom: var(--space-2);
+}
+
+.politique-section__text:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Tablette ── */
+@media (max-width: 1024px) {
+  .politique-page__hero-title {
+    font-size: var(--text-3xl);
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .politique-page__hero-container {
+    padding: var(--space-12) var(--space-6);
+  }
+
+  .politique-page__hero-title {
+    font-size: var(--text-2xl);
+  }
+
+  .politique-page__container {
+    padding: 0 var(--space-6);
+  }
+
+  .politique-page__content {
+    padding: var(--space-12) 0;
+  }
+}

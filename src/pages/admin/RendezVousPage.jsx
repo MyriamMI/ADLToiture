@@ -297,6 +297,12 @@ export default function RendezVousPage() {
       {/* ── En-tête de page ── */}
       <div className="rdv-page__header">
         <h1 className="rdv-page__title">Rendez-vous</h1>
+        <button
+          style={{ background: 'transparent', border: '2px solid #550101', color: '#550101', borderRadius: '8px', padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}
+          onClick={() => window.open('/api/rdv/export-ical.php', '_blank')}
+        >
+          📅 Exporter confirmés
+        </button>
         <button className="rdv-page__new-btn" onClick={openCreateModal}>
           + Nouveau Rendez-vous
         </button>
