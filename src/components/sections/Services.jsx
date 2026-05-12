@@ -32,7 +32,12 @@ export default function Services() {
         </div>
 
         <div className="services__image">
-          <div className="services__image-placeholder" aria-hidden="true" />
+          <img
+            src="https://images.unsplash.com/photo-1605463556751-8c283631e95d?q=80&w=1200&auto=format&fit=crop"
+            alt="Ardoises grises sur une toiture en Brabant wallon"
+            className="services__img"
+            loading="lazy"
+          />
         </div>
 
       </div>

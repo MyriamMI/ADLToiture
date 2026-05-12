@@ -122,11 +122,13 @@
   justify-content: center;
 }
 
-.about-page__image-placeholder {
+.about-page__parcours-img {
   width: 100%;
   aspect-ratio: 4 / 3;
-  background-color: var(--color-border);
+  object-fit: cover;
   border-radius: var(--radius-lg);
+  display: block;
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Values ── */
@@ -154,10 +156,9 @@
 }
 
 .value-card__icon {
-  width: 40px;
-  height: 40px;
-  background-color: var(--color-border);
-  border-radius: var(--radius-md);
+  font-size: 1.75rem;
+  line-height: 1;
+  color: #222222;
   flex-shrink: 0;
 }
 
@@ -225,7 +226,7 @@
     order: -1;
   }
 
-  .about-page__image-placeholder {
+  .about-page__parcours-img {
     aspect-ratio: 16 / 9;
   }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import './styles/DashboardPage.css'
 
 /* ── Données de démonstration — remplacées par l'API en production ── */
@@ -89,8 +90,15 @@ function todayLabel() {
 }
 
 export default function DashboardPage() {
+  const { logout } = useAuth()
+  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  function handleLogout() {
+    logout()
+    navigate('/', { replace: true })
+  }
 
   /* Chargement des données depuis l'API ou les données de démonstration */
   useEffect(() => {
@@ -126,6 +134,18 @@ export default function DashboardPage() {
       <div className="dashboard__header">
         <h1 className="dashboard__title">Tableau de bord</h1>
         <p className="dashboard__subtitle">{todayLabel()}</p>
+      </div>
+
+      {/* ── Carte profil — mobile uniquement (sidebar masquée < 768px) ── */}
+      <div className="dashboard__profile-card">
+        <div className="dashboard__profile-avatar" aria-hidden="true">AD</div>
+        <div className="dashboard__profile-info">
+          <span className="dashboard__profile-name">ADL Toiture</span>
+          <span className="dashboard__profile-email">admin@adltoiture.be</span>
+        </div>
+        <button className="dashboard__profile-logout" onClick={handleLogout}>
+          ⏻ Se déconnecter
+        </button>
       </div>
 
       {/* ── Grille des indicateurs clés (2 × 2) ── */}

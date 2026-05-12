@@ -63,9 +63,9 @@
 .hero__btn--primary,
 .hero__btn--primary:link,
 .hero__btn--primary:visited {
-  background-color: #fcf4eb;
+  background-color: #f5f5f5;
   color: #1a1a1a;
-  border: 2px solid #fcf4eb;
+  border: 2px solid #f5f5f5;
 }
 
 .hero__btn--primary:hover {
@@ -85,19 +85,20 @@
   transform: translateY(-1px);
 }
 
-/* ── Image placeholder ── */
+/* ── Image ── */
 .hero__image {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.hero__image-placeholder {
+.hero__img {
   width: 100%;
   aspect-ratio: 4 / 3;
-  background-color: rgba(255, 255, 255, 0.1);
+  object-fit: cover;
   border-radius: var(--radius-lg);
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  display: block;
+  box-shadow: var(--shadow-lg);
 }
 
 /* ── Tablet ── */
@@ -123,7 +124,7 @@
     order: -1;
   }
 
-  .hero__image-placeholder {
+  .hero__img {
     aspect-ratio: 16 / 9;
   }
 }

@@ -9,8 +9,15 @@
   margin: 0 auto;
   padding: var(--space-8) var(--space-8);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr 1.6fr 1fr;
   gap: var(--space-8);
+}
+
+/* Deux sous-colonnes dans la colonne Services */
+.footer__services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 var(--space-4);
 }
 
 .footer__heading {
@@ -52,35 +59,80 @@
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.footer__bottom p {
+.footer__bottom-inner {
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: var(--space-4) var(--space-8);
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
-  text-align: center;
+  padding: var(--space-2) var(--space-8) var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* ── Mobile ── */
-@media (max-width: 768px) {
+.footer__bottom-inner p {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__bottom-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.footer__bottom-legal {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.footer__bottom-legal:hover {
+  color: #ffffff;
+}
+
+/* ── iPad (768px – 1023px) : grille 2 × 2 ── */
+@media (max-width: 1023px) {
   .footer__container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Mobile (< 768px) : grille 2 × 2 avec ordre personnalisé ── */
+@media (max-width: 767px) {
+  .footer__container {
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-6);
     padding: var(--space-8) var(--space-6);
   }
 
-  .footer__bottom p {
+  /* Contact    → haut gauche  */
+  .footer__col:nth-child(1) { order: 1; }
+  /* Services   → haut droite  */
+  .footer__col:nth-child(3) { order: 2; }
+  /* Navigation → bas gauche   */
+  .footer__col:nth-child(2) { order: 3; }
+  /* Horaires   → bas droite   */
+  .footer__col:nth-child(4) { order: 4; }
+
+  .footer__services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer__bottom-inner {
     padding: var(--space-6);
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
   }
 }
-/* Lien admin discret dans le footer */
+/* Lien admin discret — centré au-dessus de la ligne copyright */
 .admin-link {
+  display: block;
+  text-align: center;
+  padding-top: var(--space-3);
   color: rgba(255, 255, 255, 0.3);
   font-size: 0.75rem;
   text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .admin-link:hover {

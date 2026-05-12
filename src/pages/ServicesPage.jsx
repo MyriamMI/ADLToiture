@@ -1,44 +1,56 @@
+import {
+  FaRegBuilding, FaRegEdit, FaRegCircle, FaRegSnowflake,
+  FaRegWindowMaximize, FaRegStar, FaRegClock, FaRegEye,
+} from 'react-icons/fa'
 import './styles/ServicesPage.css'
 
 const services = [
   {
+    Icon: FaRegBuilding,
     title: 'Pose de toiture neuve',
-    description: 'Installation complète de votre toiture sur ossature neuve ou charpente existante, tous matériaux.',
+    description: 'Installation complète sur ossature neuve ou existante — ardoise, tuile ou bac acier.',
     price: '80 €/m²',
   },
   {
+    Icon: FaRegEdit,
     title: 'Rénovation de couverture',
-    description: 'Remplacement partiel ou total de votre couverture existante avec remise aux normes.',
+    description: 'Remplacement partiel ou total de la couverture avec remise aux normes.',
     price: '45 €/m²',
   },
   {
+    Icon: FaRegCircle,
     title: 'Zinguerie',
-    description: 'Pose et remplacement de gouttières, descentes, noues, faîtages et solins en zinc.',
+    description: "Gouttières, descentes, noues et solins en zinc, cuivre ou aluminium.",
     price: '35 €/ml',
   },
   {
+    Icon: FaRegSnowflake,
     title: 'Isolation toiture',
-    description: "Isolation thermique par l'extérieur ou en sarking pour améliorer votre confort et économiser l'énergie.",
+    description: "Sarking ou sous-toiture pour améliorer le confort et réduire vos charges énergétiques.",
     price: '25 €/m²',
   },
   {
+    Icon: FaRegWindowMaximize,
     title: 'Velux & fenêtres de toit',
-    description: 'Fourniture et pose de fenêtres de toit pour apporter lumière et ventilation à vos combles.',
-    price: '350 €',
+    description: 'Fourniture et pose de fenêtres de toit pour éclairer naturellement vos combles.',
+    price: 'dès 350 €',
   },
   {
+    Icon: FaRegStar,
     title: 'Nettoyage & traitement',
-    description: 'Démoussage, nettoyage haute pression et traitement hydrofuge pour prolonger la durée de vie de votre toiture.',
+    description: 'Démoussage, nettoyage haute pression et traitement hydrofuge anti-infiltrations.',
     price: '15 €/m²',
   },
   {
+    Icon: FaRegClock,
     title: "Réparation d'urgence",
-    description: 'Intervention rapide pour fuite, tuile cassée ou dégât après tempête, avec bâchage provisoire si nécessaire.',
-    price: '80 €',
+    description: 'Intervention 7j/7 pour fuite, tuile cassée ou dégât après tempête.',
+    price: 'dès 80 €',
   },
   {
+    Icon: FaRegEye,
     title: 'Inspection & diagnostic',
-    description: "Visite complète de votre toiture avec rapport détaillé de l'état général et recommandations.",
+    description: "Visite avec rapport détaillé et recommandations chiffrées, sans engagement.",
     price: 'Gratuit',
   },
 ]
@@ -46,23 +58,23 @@ const services = [
 const steps = [
   {
     number: '01',
-    title: 'Diagnostic gratuit',
-    description: "Prise de contact et visite sur place pour évaluer l'état de votre toiture.",
+    title: 'Prise de contact',
+    description: "Appelez-moi ou remplissez le formulaire en ligne. Je vous rappelle sous 24h pour convenir d'un rendez-vous.",
   },
   {
     number: '02',
-    title: 'Préparation',
-    description: "Devis détaillé, commande des matériaux et planification de l'intervention.",
+    title: 'Diagnostic gratuit',
+    description: "Visite sur place pour évaluer l'état de votre toiture et établir un devis détaillé, sans engagement de votre part.",
   },
   {
     number: '03',
-    title: 'Intervention',
-    description: "Réalisation des travaux dans les règles de l'art, dans le respect des délais convenus.",
+    title: 'Réalisation des travaux',
+    description: "Intervention soignée dans le respect des délais convenus, avec les matériaux adaptés à votre toiture et votre budget.",
   },
   {
     number: '04',
-    title: 'Contrôle final',
-    description: 'Vérification complète du chantier et remise des documents de garantie.',
+    title: 'Réception & garantie',
+    description: "Vérification finale du chantier en votre présence, remise des documents de garantie et nettoyage complet du chantier.",
   },
 ]
 
@@ -75,8 +87,9 @@ export default function ServicesPage() {
         <div className="services-page__hero-container">
           <h1 className="services-page__hero-title">Services de couverture</h1>
           <p className="services-page__hero-subtitle">
-            Des prestations complètes réalisées par un artisan couvreur qualifié
-            en Brabant wallon. Devis gratuit, intervention rapide.
+            Dylan Laurent, artisan couvreur qualifié en Brabant wallon depuis 10&nbsp;ans.
+            Chaque prestation est réalisée avec soin, des matériaux sélectionnés
+            et dans le respect strict des délais convenus.
           </p>
         </div>
       </section>
@@ -87,7 +100,7 @@ export default function ServicesPage() {
           <div className="services-page__grid">
             {services.map((service, index) => (
               <div key={service.title} className="service-card" data-aos="fade-up" data-aos-delay={index * 75}>
-                <div className="service-card__icon" aria-hidden="true" />
+                <span className="service-card__icon" aria-hidden="true"><service.Icon /></span>
                 <h3 className="service-card__title">{service.title}</h3>
                 <p className="service-card__description">{service.description}</p>
                 <span className="service-card__price">{service.price}</span>
