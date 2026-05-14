@@ -1,28 +1,39 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
-/* Contexte d'authentification global */
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  /* Lecture du token depuis le stockage local au démarrage */
-  const [token, setToken] = useState(() => localStorage.getItem('adl_token'))
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [checking, setChecking] = useState(true)
 
-  /* Sauvegarde du token après connexion réussie */
-  function login(newToken) {
-    localStorage.setItem('adl_token', newToken)
-    setToken(newToken)
+  /* Vérifie la session PHP au chargement de l'app */
+  useEffect(() => {
+    fetch('http://localhost/ADLToiture/php/api/auth/check', {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => setIsAuthenticated(data.authenticated === true))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setChecking(false))
+  }, [])
+
+  function login() {
+    setIsAuthenticated(true)
   }
 
-  /* Suppression du token lors de la déconnexion */
-  function logout() {
-    localStorage.removeItem('adl_token')
-    setToken(null)
+  /* Appelle l'endpoint de déconnexion pour détruire la session PHP */
+  async function logout() {
+    await fetch('http://localhost/ADLToiture/php/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(() => {})
+    setIsAuthenticated(false)
   }
 
-  const isAuthenticated = !!token
+  if (checking) return null
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   )

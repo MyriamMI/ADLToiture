@@ -20,27 +20,22 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // ── Mock temporaire — supprimer ce bloc quand l'API PHP est prête ──
-      if (username === "admin" && password === "admin123") {
-        login("fake-jwt-token");
-        navigate("/admin/dashboard");
-      } else {
-        setError("Identifiants incorrects");
+      const response = await fetch("http://localhost/ADLToiture/php/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Identifiants incorrects. Veuillez réessayer.");
+        return;
       }
 
-      // ── Vrai appel API — décommenter quand l'API PHP est prête ──
-      // const response = await fetch('/api/auth/login.php', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ username, password }),
-      // })
-      // const data = await response.json()
-      // if (!response.ok) {
-      //   setError(data.message || 'Identifiants incorrects. Veuillez réessayer.')
-      //   return
-      // }
-      // login(data.token)
-      // navigate('/admin/dashboard', { replace: true })
+      login();
+      navigate("/admin/dashboard", { replace: true });
     } catch {
       setError("Impossible de contacter le serveur. Vérifiez votre connexion.");
     } finally {
@@ -81,17 +76,17 @@ export default function LoginPage() {
 
           {/* Formulaire d'authentification */}
           <form className="login-page__form" onSubmit={handleSubmit} noValidate>
-            {/* Champ nom d'utilisateur */}
+            {/* Champ email */}
             <div className="login-page__field">
               <label className="login-page__label" htmlFor="username">
-                Nom d'utilisateur
+                Email
               </label>
               <input
                 id="username"
                 className="login-page__input"
-                type="text"
-                autoComplete="username"
-                placeholder="Votre identifiant"
+                type="email"
+                autoComplete="email"
+                placeholder="Votre adresse email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required

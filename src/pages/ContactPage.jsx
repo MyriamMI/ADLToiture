@@ -47,6 +47,7 @@ const SERVICES = [
 const INITIAL_FORM = {
   nom: "",
   tel: "",
+  ville: "",
   email: "",
   service: "",
   surface: "",
@@ -201,6 +202,30 @@ export default function ContactPage() {
                       placeholder="0470 00 00 00"
                     />
                   </div>
+                </div>
+
+                {/* Ville */}
+                <div className="contact-form__group">
+                  <label className="contact-form__label" htmlFor="cf-ville">
+                    Ville{" "}
+                    <span
+                      className="contact-form__required"
+                      aria-hidden="true"
+                    >
+                      *
+                    </span>
+                  </label>
+                  <input
+                    id="cf-ville"
+                    name="ville"
+                    type="text"
+                    className="contact-form__input contact-form__input--half"
+                    value={form.ville}
+                    onChange={handleChange}
+                    required
+                    autoComplete="address-level2"
+                    placeholder="ex. Wavre"
+                  />
                 </div>
 
                 {/* Email + Type de service */}

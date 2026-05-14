@@ -1,194 +1,89 @@
-/**
- * api.js — Couche de service centralisée pour les appels à l'API PHP.
- *
- * Toutes les requêtes vers le back-end passent par ce fichier.
- * Cela permet de changer l'URL de base en un seul endroit, de gérer
- * les en-têtes communs (authentification, Content-Type) de façon
- * uniforme, et d'isoler la logique réseau du reste des composants React.
- *
- * Utilisation dans un composant :
- *   import { getClients } from '../services/api'
- *   const clients = await getClients()
- */
+// src/services/api.js
 
-/* ── URL de base de l'API PHP ── */
-export const API_BASE_URL = '/api'
+const BASE_URL = "http://localhost/ADLToiture/php/api";
 
-/* ── En-têtes communs à toutes les requêtes ── */
-const defaultHeaders = {
-  'Content-Type': 'application/json',
+// ─── Utilitaire central ───────────────────────────────────────────────────────
+// Toutes les fonctions ci-dessous passent par ici.
+// credentials: "include" est indispensable pour envoyer le cookie de session PHP.
+async function apiFetch(endpoint, options = {}) {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    ...options,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || `Erreur ${response.status}`);
+  }
+
+  return response.json();
 }
 
-/* ══════════════════════════════
-   Clients
-══════════════════════════════ */
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+export const login = (email, password) =>
+  apiFetch("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
 
-/**
- * Récupère la liste complète des clients.
- * @returns {Promise<Array>}
- */
-export async function getClients() {
-  // const res = await fetch(`${API_BASE_URL}/clients.php`, { headers: defaultHeaders })
-  // if (!res.ok) throw new Error('Erreur lors du chargement des clients')
-  // return res.json()
-}
+export const logout = () => apiFetch("/auth/logout", { method: "POST" });
 
-/**
- * Crée un nouveau client.
- * @param {Object} data — Données du formulaire client
- * @returns {Promise<Object>}
- */
-export async function createClient(data) {
-  // const res = await fetch(`${API_BASE_URL}/clients.php`, {
-  //   method: 'POST',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la création du client')
-  // return res.json()
-}
+export const checkAuth = () => apiFetch("/auth/check");
 
-/**
- * Met à jour un client existant.
- * @param {number|string} id
- * @param {Object} data
- * @returns {Promise<Object>}
- */
-export async function updateClient(id, data) {
-  // const res = await fetch(`${API_BASE_URL}/clients.php?id=${id}`, {
-  //   method: 'PUT',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la mise à jour du client')
-  // return res.json()
-}
+// ─── Dashboard KPI ────────────────────────────────────────────────────────────
+export const getKpi = () => apiFetch("/kpi"); // à créer côté PHP
 
-/**
- * Supprime un client.
- * @param {number|string} id
- * @returns {Promise<void>}
- */
-export async function deleteClient(id) {
-  // const res = await fetch(`${API_BASE_URL}/clients.php?id=${id}`, {
-  //   method: 'DELETE',
-  //   headers: defaultHeaders,
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la suppression du client')
-}
+// ─── Clients ──────────────────────────────────────────────────────────────────
+export const getClients = () => apiFetch("/clients");
+export const getClientById = (id) => apiFetch(`/clients/${id}`);
+export const createClient = (data) =>
+  apiFetch("/clients", { method: "POST", body: JSON.stringify(data) });
+export const updateClient = (id, data) =>
+  apiFetch(`/clients/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteClient = (id) =>
+  apiFetch(`/clients/${id}`, { method: "DELETE" });
 
-/* ══════════════════════════════
-   Rendez-vous
-══════════════════════════════ */
+// ─── Demandes ─────────────────────────────────────────────────────────────────
+export const getDemandes = () => apiFetch("/demandes");
+export const updateDemandeStatut = (id, statut) =>
+  apiFetch(`/demandes/${id}/statut`, {
+    method: "PATCH",
+    body: JSON.stringify({ statut }),
+  });
 
-/**
- * Récupère la liste complète des rendez-vous.
- * @returns {Promise<Array>}
- */
-export async function getRendezVous() {
-  // const res = await fetch(`${API_BASE_URL}/rdv.php`, { headers: defaultHeaders })
-  // if (!res.ok) throw new Error('Erreur lors du chargement des rendez-vous')
-  // return res.json()
-}
+// ─── Rendez-vous ──────────────────────────────────────────────────────────────
+export const getRdv = () => apiFetch("/rdv");
+export const createRdv = (data) =>
+  apiFetch("/rdv", { method: "POST", body: JSON.stringify(data) });
+export const updateRdv = (id, data) =>
+  apiFetch(`/rdv/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteRdv = (id) => apiFetch(`/rdv/${id}`, { method: "DELETE" });
+export const exportIcal = (id) => `${BASE_URL}/rdv/${id}/ical`; // utilisé directement comme href de lien
 
-/**
- * Crée un nouveau rendez-vous.
- * @param {Object} data
- * @returns {Promise<Object>}
- */
-export async function createRendezVous(data) {
-  // const res = await fetch(`${API_BASE_URL}/rdv.php`, {
-  //   method: 'POST',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la création du rendez-vous')
-  // return res.json()
-}
+// ─── Devis ────────────────────────────────────────────────────────────────────
+export const getDevis = () => apiFetch("/devis");
+export const createDevis = (data) =>
+  apiFetch("/devis", { method: "POST", body: JSON.stringify(data) });
+export const updateDevis = (id, data) =>
+  apiFetch(`/devis/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteDevis = (id) =>
+  apiFetch(`/devis/${id}`, { method: "DELETE" });
 
-/**
- * Met à jour un rendez-vous existant.
- * @param {number|string} id
- * @param {Object} data
- * @returns {Promise<Object>}
- */
-export async function updateRendezVous(id, data) {
-  // const res = await fetch(`${API_BASE_URL}/rdv.php?id=${id}`, {
-  //   method: 'PUT',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la mise à jour du rendez-vous')
-  // return res.json()
-}
+// ─── Avis ─────────────────────────────────────────────────────────────────────
+export const getAvis = () => apiFetch("/avis");
+export const updateAvisStatut = (id, statut) =>
+  apiFetch(`/avis/${id}`, { method: "PUT", body: JSON.stringify({ statut }) });
+export const deleteAvis = (id) => apiFetch(`/avis/${id}`, { method: "DELETE" });
 
-/**
- * Supprime un rendez-vous.
- * @param {number|string} id
- * @returns {Promise<void>}
- */
-export async function deleteRendezVous(id) {
-  // const res = await fetch(`${API_BASE_URL}/rdv.php?id=${id}`, {
-  //   method: 'DELETE',
-  //   headers: defaultHeaders,
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la suppression du rendez-vous')
-}
+// ─── FAQ ──────────────────────────────────────────────────────────────────────
+export const getFaq = () => apiFetch("/faq");
+export const createFaq = (data) =>
+  apiFetch("/faq", { method: "POST", body: JSON.stringify(data) });
+export const updateFaq = (id, data) =>
+  apiFetch(`/faq/${id}`, { method: "PUT", body: JSON.stringify(data) });
+export const deleteFaq = (id) => apiFetch(`/faq/${id}`, { method: "DELETE" });
 
-/* ══════════════════════════════
-   Devis
-══════════════════════════════ */
-
-/**
- * Récupère la liste complète des devis.
- * @returns {Promise<Array>}
- */
-export async function getDevis() {
-  // const res = await fetch(`${API_BASE_URL}/devis.php`, { headers: defaultHeaders })
-  // if (!res.ok) throw new Error('Erreur lors du chargement des devis')
-  // return res.json()
-}
-
-/**
- * Crée un nouveau devis.
- * @param {Object} data
- * @returns {Promise<Object>}
- */
-export async function createDevis(data) {
-  // const res = await fetch(`${API_BASE_URL}/devis.php`, {
-  //   method: 'POST',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la création du devis')
-  // return res.json()
-}
-
-/**
- * Met à jour un devis existant.
- * @param {number|string} id
- * @param {Object} data
- * @returns {Promise<Object>}
- */
-export async function updateDevis(id, data) {
-  // const res = await fetch(`${API_BASE_URL}/devis.php?id=${id}`, {
-  //   method: 'PUT',
-  //   headers: defaultHeaders,
-  //   body: JSON.stringify(data),
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la mise à jour du devis')
-  // return res.json()
-}
-
-/**
- * Supprime un devis.
- * @param {number|string} id
- * @returns {Promise<void>}
- */
-export async function deleteDevis(id) {
-  // const res = await fetch(`${API_BASE_URL}/devis.php?id=${id}`, {
-  //   method: 'DELETE',
-  //   headers: defaultHeaders,
-  // })
-  // if (!res.ok) throw new Error('Erreur lors de la suppression du devis')
-}
+// ─── Formulaire public (Contact) ──────────────────────────────────────────────
+export const sendDemande = (data) =>
+  apiFetch("/demandes", { method: "POST", body: JSON.stringify(data) });
