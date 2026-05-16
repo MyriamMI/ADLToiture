@@ -5,6 +5,7 @@ import './styles/AdminLayout.css'
 
 const NAV_ITEMS = [
   { path: '/admin/dashboard',    label: 'Tableau de bord',   icon: '⊞' },
+  { path: '/admin/demandes',     label: 'Demandes',          icon: <i className="fas fa-inbox" aria-hidden="true" /> },
   { path: '/admin/appointments', label: 'Rendez-vous',       icon: '◷' },
   { path: '/admin/clients',      label: 'Clients',           icon: '◎' },
   { path: '/admin/quotes',       label: 'Devis',             icon: '≡' },
@@ -13,12 +14,13 @@ const NAV_ITEMS = [
 ]
 
 const BOTTOM_NAV_ITEMS = [
-  { path: '/admin/dashboard',    icon: '⊞', title: 'Tableau de bord' },
-  { path: '/admin/appointments', icon: '◷', title: 'Rendez-vous' },
-  { path: '/admin/clients',      icon: '◎', title: 'Clients' },
-  { path: '/admin/quotes',       icon: '≡', title: 'Devis' },
-  { path: '/admin/reviews',      icon: '★', title: 'Avis & FAQ' },
-  { path: '/admin/stats',        icon: '▦', title: 'Statistiques' },
+  { path: '/admin/dashboard',    icon: '⊞',                                                      title: 'Tableau de bord' },
+  { path: '/admin/demandes',     icon: <i className="fas fa-inbox" aria-hidden="true" />,         title: 'Demandes' },
+  { path: '/admin/appointments', icon: '◷',                                                      title: 'Rendez-vous' },
+  { path: '/admin/clients',      icon: '◎',                                                      title: 'Clients' },
+  { path: '/admin/quotes',       icon: '≡',                                                      title: 'Devis' },
+  { path: '/admin/reviews',      icon: '★',                                                      title: 'Avis & FAQ' },
+  { path: '/admin/stats',        icon: '▦',                                                      title: 'Statistiques' },
 ]
 
 export default function AdminLayout() {
@@ -90,7 +92,7 @@ export default function AdminLayout() {
             onClick={handleLogout}
             title={isCollapsed ? 'Se déconnecter' : undefined}
           >
-            <span aria-hidden="true">⏻</span>
+            <i className="fas fa-power-off" aria-hidden="true"></i>
             <span className="admin-sidebar__profile-logout-label">Se déconnecter</span>
           </button>
         </div>

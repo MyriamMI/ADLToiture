@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { checkAuth, logout as apiLogout } from '../services/api'
 
 const AuthContext = createContext(null)
 
@@ -8,10 +9,7 @@ export function AuthProvider({ children }) {
 
   /* Vérifie la session PHP au chargement de l'app */
   useEffect(() => {
-    fetch('http://localhost/ADLToiture/php/api/auth/check', {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
+    checkAuth()
       .then((data) => setIsAuthenticated(data.authenticated === true))
       .catch(() => setIsAuthenticated(false))
       .finally(() => setChecking(false))
@@ -23,10 +21,7 @@ export function AuthProvider({ children }) {
 
   /* Appelle l'endpoint de déconnexion pour détruire la session PHP */
   async function logout() {
-    await fetch('http://localhost/ADLToiture/php/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    }).catch(() => {})
+    await apiLogout().catch(() => {})
     setIsAuthenticated(false)
   }
 

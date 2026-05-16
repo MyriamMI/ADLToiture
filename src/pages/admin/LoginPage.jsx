@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { login as apiLogin } from "../../services/api";
 import "./styles/LoginPage.css";
 
 export default function LoginPage() {
@@ -20,24 +21,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost/ADLToiture/php/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Identifiants incorrects. Veuillez réessayer.");
-        return;
-      }
-
+      await apiLogin(username, password);
       login();
       navigate("/admin/dashboard", { replace: true });
-    } catch {
-      setError("Impossible de contacter le serveur. Vérifiez votre connexion.");
+    } catch (err) {
+      setError(err.message || "Identifiants incorrects. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +50,7 @@ export default function LoginPage() {
 
         {/* Lien retour au site public — ancré en bas de la colonne */}
         <Link to="/" className="login-page__back">
-          ← Retour au site public
+          <i className="fas fa-arrow-left"></i> Retour au site public
         </Link>
       </div>
 

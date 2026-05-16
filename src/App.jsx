@@ -20,6 +20,7 @@ import RendezVousPage from './pages/admin/RendezVousPage'
 import ClientsPage from './pages/admin/ClientsPage'
 import DevisPage from './pages/admin/DevisPage'
 import DevisCalculateurPage from './pages/admin/DevisCalculateurPage'
+import DemandesPage from './pages/admin/DemandesPage'
 import AvisFaqPage from './pages/admin/AvisFaqPage'
 import StatistiquesPage from './pages/admin/StatistiquesPage'
 
@@ -51,6 +52,7 @@ function App() {
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
         <Route path="/admin/dashboard"         element={<DashboardPage />} />
+        <Route path="/admin/demandes"          element={<DemandesPage />} />
         <Route path="/admin/appointments"      element={<RendezVousPage />} />
         <Route path="/admin/clients"           element={<ClientsPage />} />
         <Route path="/admin/quotes"            element={<DevisPage />} />

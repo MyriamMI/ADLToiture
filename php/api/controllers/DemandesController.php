@@ -83,7 +83,7 @@ class DemandesController
     {
         checkAuth();
 
-        $allowed = ['nouvelle', 'traitee', 'refusee'];
+        $allowed = ['nouvelle', 'traitee', 'refusee', 'reportee', 'reorientee'];
         if (empty($data['statut']) || !in_array($data['statut'], $allowed, true)) {
             http_response_code(400);
             echo json_encode(['error' => 'statut must be one of: ' . implode(', ', $allowed)]);
@@ -92,6 +92,23 @@ class DemandesController
 
         $stmt = $this->db->prepare('UPDATE demandes SET statut = ? WHERE id = ?');
         $stmt->execute([$data['statut'], $id]);
+
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Demande not found']);
+            return;
+        }
+
+        echo json_encode(['success' => true]);
+    }
+
+    /** DELETE /demandes/{id} — remove a submission. */
+    public function delete(int $id): void
+    {
+        checkAuth();
+
+        $stmt = $this->db->prepare('DELETE FROM demandes WHERE id = ?');
+        $stmt->execute([$id]);
 
         if ($stmt->rowCount() === 0) {
             http_response_code(404);

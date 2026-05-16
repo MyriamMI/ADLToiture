@@ -1,82 +1,40 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { getKpi } from '../../services/api'
 import './styles/DashboardPage.css'
 
-/* ── Données de démonstration — remplacées par l'API en production ── */
-const MOCK_DATA = {
-  kpi: {
-    rdvEnAttente: 5,
-    rdvConfirmes: 12,
-    clientsActifs: 48,
-    travauxTermines: 156,
-  },
-  rdv: [
-    {
-      id: 1,
-      client: 'Jean Dupont',
-      date: '28 avr. 2026',
-      service: 'Rénovation toiture',
-      statut: 'En attente',
-    },
-    {
-      id: 2,
-      client: 'Marie Martin',
-      date: '29 avr. 2026',
-      service: 'Pose neuve',
-      statut: 'Confirmé',
-    },
-    {
-      id: 3,
-      client: 'Paul Bernard',
-      date: '30 avr. 2026',
-      service: 'Zinguerie',
-      statut: 'En cours',
-    },
-    {
-      id: 4,
-      client: 'Sophie Leroy',
-      date: '02 mai 2026',
-      service: 'Isolation combles',
-      statut: 'Confirmé',
-    },
-    {
-      id: 5,
-      client: 'Luc Moreau',
-      date: '03 mai 2026',
-      service: 'Nettoyage toiture',
-      statut: 'Annulé',
-    },
-  ],
-  clients: [
-    { id: 1, client: 'Jean Dupont',     date: '24 avr. 2026', statut: 'Actif' },
-    { id: 2, client: 'Marie Martin',    date: '22 avr. 2026', statut: 'Actif' },
-    { id: 3, client: 'Paul Bernard',    date: '20 avr. 2026', statut: 'En cours' },
-    { id: 4, client: 'Isabelle Simon',  date: '18 avr. 2026', statut: 'Terminé' },
-  ],
+const STATUS_LABEL = {
+  en_attente: 'En attente',
+  confirme:   'Confirmé',
+  annule:     'Annulé',
+  termine:    'Terminé',
+  nouveau:    'Nouveau',
+  en_cours:   'En cours',
 }
 
-/* Retourne les deux premières initiales d'un nom complet */
 function getInitials(name) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
+  if (!name) return '?'
+  return String(name).split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
 }
 
-/* Retourne la classe CSS correspondant au statut */
 function statusClass(statut) {
   switch (statut) {
-    case 'En attente': return 'status-badge--pending'
-    case 'Confirmé':   return 'status-badge--confirmed'
-    case 'Annulé':     return 'status-badge--cancelled'
-    case 'En cours':   return 'status-badge--in-progress'
-    case 'Terminé':    return 'status-badge--done'
-    case 'Actif':      return 'status-badge--active'
+    case 'en_attente': return 'status-badge--pending'
+    case 'confirme':   return 'status-badge--confirmed'
+    case 'annule':     return 'status-badge--cancelled'
+    case 'termine':    return 'status-badge--done'
+    case 'nouveau':    return 'status-badge--active'
+    case 'en_cours':   return 'status-badge--in-progress'
     default:           return 'status-badge--done'
   }
+}
+
+function formatDate(iso) {
+  if (!iso) return '—'
+  return new Date(iso.replace(' ', 'T')).toLocaleDateString('fr-BE', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
 }
 
 /* Date du jour en français */
@@ -92,30 +50,20 @@ function todayLabel() {
 export default function DashboardPage() {
   const { logout } = useAuth()
   const navigate = useNavigate()
-  const [data, setData] = useState(null)
+  const [data, setData]     = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError]   = useState(null)
 
   function handleLogout() {
     logout()
     navigate('/', { replace: true })
   }
 
-  /* Chargement des données depuis l'API ou les données de démonstration */
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/dashboard.php')
-        if (!res.ok) throw new Error('API non disponible')
-        const json = await res.json()
-        setData(json)
-      } catch {
-        /* Repli sur les données de démonstration si l'API est inaccessible */
-        setData(MOCK_DATA)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
+    getKpi()
+      .then(setData)
+      .catch((err) => setError(err.message || 'Impossible de charger le tableau de bord.'))
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) {
@@ -126,7 +74,15 @@ export default function DashboardPage() {
     )
   }
 
-  const { kpi, rdv, clients } = data
+  if (error) {
+    return (
+      <div className="dashboard">
+        <p style={{ color: '#c0392b', fontSize: '0.875rem' }}>{error}</p>
+      </div>
+    )
+  }
+
+  const { kpi, rdvRecents: rdv, clientsRecents: clients } = data
 
   return (
     <div className="dashboard">
@@ -144,7 +100,7 @@ export default function DashboardPage() {
           <span className="dashboard__profile-email">admin@adltoiture.be</span>
         </div>
         <button className="dashboard__profile-logout" onClick={handleLogout}>
-          ⏻ Se déconnecter
+          <i className="fas fa-power-off"></i> Se déconnecter
         </button>
       </div>
 
@@ -194,7 +150,7 @@ export default function DashboardPage() {
         <div className="dashboard__section-header">
           <h2 className="dashboard__section-title">Rendez-vous récents</h2>
           <Link to="/admin/appointments" className="dashboard__section-link">
-            Voir tous →
+            Voir tous <i className="fas fa-arrow-right"></i>
           </Link>
         </div>
 
@@ -212,26 +168,19 @@ export default function DashboardPage() {
             <tbody>
               {rdv.map((row) => (
                 <tr key={row.id}>
-                  {/* Cellule client avec avatar initiales */}
                   <td>
                     <div className="table-client">
                       <span className="table-avatar" aria-hidden="true">
-                        {getInitials(row.client)}
+                        {getInitials(row.client_nom)}
                       </span>
-                      <span className="table-client__name">{row.client}</span>
+                      <span className="table-client__name">{row.client_nom}</span>
                     </div>
                   </td>
-
-                  {/* Date du rendez-vous */}
-                  <td className="col-date-rdv">{row.date}</td>
-
-                  {/* Type de service */}
+                  <td className="col-date-rdv">{formatDate(row.date_rdv)}</td>
                   <td className="col-service">{row.service}</td>
-
-                  {/* Badge de statut */}
                   <td>
                     <span className={`status-badge ${statusClass(row.statut)}`}>
-                      {row.statut}
+                      {STATUS_LABEL[row.statut] ?? row.statut}
                     </span>
                   </td>
 
@@ -243,21 +192,21 @@ export default function DashboardPage() {
                         title="Modifier"
                         aria-label={`Modifier le RDV de ${row.client}`}
                       >
-                        ✏
+                        <i className="fas fa-pen"></i>
                       </button>
                       <button
                         className="action-btn"
                         title="Replanifier"
                         aria-label={`Replanifier le RDV de ${row.client}`}
                       >
-                        📅
+                        <i className="fas fa-calendar-alt"></i>
                       </button>
                       <button
                         className="action-btn action-btn--delete"
                         title="Supprimer"
                         aria-label={`Supprimer le RDV de ${row.client}`}
                       >
-                        🗑
+                        <i className="fas fa-trash"></i>
                       </button>
                     </div>
                   </td>
@@ -275,7 +224,7 @@ export default function DashboardPage() {
         <div className="dashboard__section-header">
           <h2 className="dashboard__section-title">Clients récents</h2>
           <Link to="/admin/clients" className="dashboard__section-link">
-            Voir tous →
+            Voir tous <i className="fas fa-arrow-right"></i>
           </Link>
         </div>
 
@@ -292,23 +241,18 @@ export default function DashboardPage() {
             <tbody>
               {clients.map((row) => (
                 <tr key={row.id}>
-                  {/* Cellule client avec avatar initiales */}
                   <td>
                     <div className="table-client">
                       <span className="table-avatar" aria-hidden="true">
-                        {getInitials(row.client)}
+                        {getInitials(row.nom)}
                       </span>
-                      <span className="table-client__name">{row.client}</span>
+                      <span className="table-client__name">{row.nom}</span>
                     </div>
                   </td>
-
-                  {/* Date d'ajout ou dernier contact */}
-                  <td>{row.date}</td>
-
-                  {/* Badge de statut */}
+                  <td>{formatDate(row.date_creation)}</td>
                   <td>
                     <span className={`status-badge ${statusClass(row.statut)}`}>
-                      {row.statut}
+                      {STATUS_LABEL[row.statut] ?? row.statut}
                     </span>
                   </td>
 
@@ -320,7 +264,7 @@ export default function DashboardPage() {
                         title="Voir le profil"
                         aria-label={`Voir le profil de ${row.client}`}
                       >
-                        ℹ
+                        <i className="fas fa-info-circle"></i>
                       </button>
                     </div>
                   </td>

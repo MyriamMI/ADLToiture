@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const BASE_URL = "http://localhost/ADLToiture/php/api";
+const BASE_URL = "https://adltoiture.alwaysdata.net/php/api";
 
 // ─── Utilitaire central ───────────────────────────────────────────────────────
 // Toutes les fonctions ci-dessous passent par ici.
@@ -48,9 +48,11 @@ export const deleteClient = (id) =>
 export const getDemandes = () => apiFetch("/demandes");
 export const updateDemandeStatut = (id, statut) =>
   apiFetch(`/demandes/${id}/statut`, {
-    method: "PATCH",
+    method: "PUT",
     body: JSON.stringify({ statut }),
   });
+export const deleteDemande = (id) =>
+  apiFetch(`/demandes/${id}`, { method: "DELETE" });
 
 // ─── Rendez-vous ──────────────────────────────────────────────────────────────
 export const getRdv = () => apiFetch("/rdv");
@@ -73,7 +75,7 @@ export const deleteDevis = (id) =>
 // ─── Avis ─────────────────────────────────────────────────────────────────────
 export const getAvis = () => apiFetch("/avis");
 export const updateAvisStatut = (id, statut) =>
-  apiFetch(`/avis/${id}`, { method: "PUT", body: JSON.stringify({ statut }) });
+  apiFetch(`/avis/${id}/statut`, { method: "PUT", body: JSON.stringify({ statut }) });
 export const deleteAvis = (id) => apiFetch(`/avis/${id}`, { method: "DELETE" });
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────

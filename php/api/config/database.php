@@ -9,10 +9,16 @@ class Database
     private static ?Database $instance = null;
     private PDO $pdo;
 
-    private string $host     = 'localhost';
+    // LOCAL
+    // private string $host     = 'localhost';
+    // private string $dbname   = 'adltoiture_db';
+    // private string $user     = 'root';
+    // private string $password = '';
+
+    private string $host     = 'mysql-adltoiture.alwaysdata.net';
     private string $dbname   = 'adltoiture_db';
-    private string $user     = 'root';
-    private string $password = '';
+    private string $user     = 'adltoiture';
+    private string $password = 'Mimi215821580.';
 
     private function __construct()
     {

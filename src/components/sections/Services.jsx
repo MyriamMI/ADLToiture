@@ -24,7 +24,7 @@ export default function Services() {
           <ul className="services__list">
             {services.map((service) => (
               <li key={service} className="services__item">
-                <span className="services__check" aria-hidden="true">✓</span>
+                <i className="fas fa-check services__check" aria-hidden="true"></i>
                 {service}
               </li>
             ))}

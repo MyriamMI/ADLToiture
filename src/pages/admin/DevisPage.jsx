@@ -1,144 +1,55 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
+import { getDevis, createDevis, updateDevis, deleteDevis } from '../../services/api'
 import './styles/DevisPage.css'
 
-/* ── Données de démonstration — remplacées par /api/devis.php ── */
-const MOCK_DEVIS = [
-  {
-    id: 1,
-    client: 'Jean Dupont',
-    date: '2026-04-28',
-    service: 'Rénovation toiture',
-    montant: 4408.48,
-    statut: 'En attente',
-    notes: 'Toiture en ardoises naturelles, accès difficile',
-    tva: 6,
-    lignes: [
-      { id: 1, description: 'Dépose ancienne toiture',    qte: 1,  prixUnit: 800 },
-      { id: 2, description: 'Fourniture ardoises (m²)',   qte: 80, prixUnit: 42  },
-      { id: 3, description: 'Pose et finitions',          qte: 1,  prixUnit: 660 },
-    ],
-  },
-  {
-    id: 2,
-    client: 'Marie Martin',
-    date: '2026-04-22',
-    service: 'Pose neuve',
-    montant: 15125.00,
-    statut: 'Accepté',
-    notes: '',
-    tva: 21,
-    lignes: [
-      { id: 4, description: 'Charpente et lattage',       qte: 1,  prixUnit: 3500 },
-      { id: 5, description: 'Tuiles en béton (m²)',       qte: 120, prixUnit: 48  },
-      { id: 6, description: 'Isolation et pare-vapeur',   qte: 1,  prixUnit: 2500 },
-    ],
-  },
-  {
-    id: 3,
-    client: 'Paul Bernard',
-    date: '2026-04-18',
-    service: 'Zinguerie',
-    montant: 1909.80,
-    statut: 'Envoyé',
-    notes: 'Remplacement gouttières zinc',
-    tva: 6,
-    lignes: [
-      { id: 7, description: 'Fourniture gouttières zinc', qte: 24, prixUnit: 35 },
-      { id: 8, description: 'Pose et soudures',           qte: 1,  prixUnit: 680 },
-    ],
-  },
-  {
-    id: 4,
-    client: 'Sophie Leroy',
-    date: '2026-04-15',
-    service: 'Isolation combles',
-    montant: 3872.00,
-    statut: 'Refusé',
-    notes: '',
-    tva: 21,
-    lignes: [
-      { id: 9,  description: 'Laine de verre (m²)',       qte: 90, prixUnit: 18 },
-      { id: 10, description: 'Pose et finitions',         qte: 1,  prixUnit: 980 },
-    ],
-  },
-  {
-    id: 5,
-    client: 'Isabelle Simon',
-    date: '2026-04-10',
-    service: 'Inspection toiture',
-    montant: 477.00,
-    statut: 'Envoyé',
-    notes: '',
-    tva: 6,
-    lignes: [
-      { id: 11, description: 'Inspection complète',       qte: 1,  prixUnit: 450 },
-    ],
-  },
-  {
-    id: 6,
-    client: 'Thomas Petit',
-    date: '2026-04-08',
-    service: 'Traitement hydrofuge',
-    montant: 826.80,
-    statut: 'Accepté',
-    notes: '',
-    tva: 6,
-    lignes: [
-      { id: 12, description: 'Produit hydrofuge (L)',     qte: 20, prixUnit: 18 },
-      { id: 13, description: 'Application',               qte: 1,  prixUnit: 441 },
-    ],
-  },
-]
-
-/* Clients disponibles pour le formulaire */
-const CLIENTS_LIST = [
-  'Jean Dupont', 'Marie Martin', 'Paul Bernard',
-  'Sophie Leroy', 'Luc Moreau', 'Isabelle Simon',
-  'Thomas Petit', 'Claire Durand',
-]
-
-/* Onglets de filtre */
 const TABS = [
   { label: 'Tous',       filter: null },
-  { label: 'En attente', filter: 'En attente' },
-  { label: 'Envoyé',     filter: 'Envoyé' },
-  { label: 'Accepté',    filter: 'Accepté' },
-  { label: 'Refusé',     filter: 'Refusé' },
+  { label: 'Brouillon',  filter: 'brouillon' },
+  { label: 'Envoyé',     filter: 'envoye' },
+  { label: 'Accepté',    filter: 'accepte' },
+  { label: 'Refusé',     filter: 'refuse' },
 ]
 
-/* Ligne vide pour le formulaire */
+const STATUS_LABEL = {
+  brouillon: 'Brouillon',
+  envoye:    'Envoyé',
+  accepte:   'Accepté',
+  refuse:    'Refusé',
+}
+
 function emptyLigne(id) {
-  return { id, description: '', qte: 1, prixUnit: 0 }
+  return { id, description: '', quantite: 1, prix_unitaire: 0 }
 }
 
 const EMPTY_FORM = {
-  client: '',
-  date: '',
-  notes: '',
-  tva: 6,
-  lignes: [],
+  client_id:     '',
+  date_creation: '',
+  notes:         '',
+  tva:           6,
+  lignes:        [],
 }
 
 /* ── Fonctions utilitaires ── */
 
 function getInitials(name) {
-  return name.split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+  if (!name) return '?'
+  return String(name).split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
 }
 
 function statusClass(statut) {
   switch (statut) {
-    case 'En attente': return 'status-badge--pending'
-    case 'Envoyé':     return 'status-badge--sent'
-    case 'Accepté':    return 'status-badge--accepted'
-    case 'Refusé':     return 'status-badge--refused'
-    default:           return 'status-badge--pending'
+    case 'brouillon': return 'status-badge--draft'
+    case 'envoye':    return 'status-badge--sent'
+    case 'accepte':   return 'status-badge--accepted'
+    case 'refuse':    return 'status-badge--refused'
+    default:          return 'status-badge--draft'
   }
 }
 
 function formatDate(iso) {
   if (!iso) return '—'
-  return new Date(iso + 'T00:00:00').toLocaleDateString('fr-BE', {
+  return new Date(iso.replace(' ', 'T')).toLocaleDateString('fr-BE', {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 }
@@ -146,48 +57,34 @@ function formatDate(iso) {
 function formatEUR(val) {
   return new Intl.NumberFormat('fr-BE', {
     style: 'currency', currency: 'EUR',
-  }).format(val)
+  }).format(val ?? 0)
 }
 
-/* Calcule le sous-total HT à partir des lignes */
 function calcSousTotal(lignes) {
-  return lignes.reduce((sum, l) => sum + l.qte * l.prixUnit, 0)
+  return lignes.reduce((sum, l) => sum + l.quantite * l.prix_unitaire, 0)
 }
 
 /* ══════════════════════════════════════════
    Composant principal
 ══════════════════════════════════════════ */
 export default function DevisPage() {
-  /* ── État principal ── */
   const [devisList, setDevisList] = useState([])
   const [loading, setLoading]     = useState(true)
   const [search, setSearch]       = useState('')
   const [activeTab, setActiveTab] = useState(null)
   const [openMenu, setOpenMenu]   = useState(null)
 
-  /* Modal : { type: null|'create'|'edit', devis: null|object } */
   const [modal, setModal]       = useState({ type: null, devis: null })
   const [formData, setFormData] = useState(EMPTY_FORM)
 
-  /* Compteur d'identifiants pour les nouvelles lignes */
   const nextLineId = useRef(200)
 
   /* ── Chargement des données ── */
   useEffect(() => {
-    async function fetchDevis() {
-      try {
-        const res = await fetch('/api/devis.php')
-        if (!res.ok) throw new Error()
-        const json = await res.json()
-        setDevisList(json)
-      } catch {
-        /* Repli sur les données de démonstration */
-        setDevisList(MOCK_DEVIS)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchDevis()
+    getDevis()
+      .then(setDevisList)
+      .catch(() => setDevisList([]))
+      .finally(() => setLoading(false))
   }, [])
 
   /* ── Verrouillage du défilement quand la modal est ouverte ── */
@@ -198,14 +95,14 @@ export default function DevisPage() {
 
   /* ── Filtrage combiné ── */
   const filtered = devisList.filter((d) => {
-    const matchSearch = d.client.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = (d.client_nom ?? '').toLowerCase().includes(search.toLowerCase())
     const matchTab    = activeTab === null || d.statut === activeTab
     return matchSearch && matchTab
   })
 
   function countFor(filter) {
     const base = search
-      ? devisList.filter((d) => d.client.toLowerCase().includes(search.toLowerCase()))
+      ? devisList.filter((d) => (d.client_nom ?? '').toLowerCase().includes(search.toLowerCase()))
       : devisList
     return filter ? base.filter((d) => d.statut === filter).length : base.length
   }
@@ -229,12 +126,16 @@ export default function DevisPage() {
 
   function openEditModal(devis) {
     setFormData({
-      client: devis.client,
-      date:   devis.date,
-      notes:  devis.notes || '',
-      tva:    devis.tva ?? 6,
-      /* Copie profonde des lignes pour éviter de muter le state principal */
-      lignes: devis.lignes.map((l) => ({ ...l })),
+      client_id:     devis.client_id ?? '',
+      date_creation: devis.date_creation ? devis.date_creation.slice(0, 10) : '',
+      notes:         devis.notes ?? '',
+      tva:           devis.tva ?? 6,
+      lignes:        (devis.lignes ?? []).map((l) => ({
+        id:           l.id ?? nextLineId.current++,
+        description:  l.description ?? '',
+        quantite:     l.quantite ?? 1,
+        prix_unitaire: l.prix_unitaire ?? 0,
+      })),
     })
     setModal({ type: 'edit', devis })
     setOpenMenu(null)
@@ -244,13 +145,11 @@ export default function DevisPage() {
     setModal({ type: null, devis: null })
   }, [])
 
-  /* Mise à jour des champs simples du formulaire */
   function handleFormChange(e) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  /* Mise à jour d'un champ d'une ligne */
   function handleLigneChange(id, field, raw) {
     const value = field === 'description' ? raw : parseFloat(raw) || 0
     setFormData((prev) => ({
@@ -261,7 +160,6 @@ export default function DevisPage() {
     }))
   }
 
-  /* Ajout d'une nouvelle ligne vide */
   function addLigne() {
     setFormData((prev) => ({
       ...prev,
@@ -269,7 +167,6 @@ export default function DevisPage() {
     }))
   }
 
-  /* Suppression d'une ligne */
   function removeLigne(id) {
     setFormData((prev) => ({
       ...prev,
@@ -277,77 +174,65 @@ export default function DevisPage() {
     }))
   }
 
-  /* Créer un nouveau devis */
   async function handleCreate(e) {
     e.preventDefault()
-    const newDevis = {
-      ...formData,
-      id:      Date.now(),
-      service: formData.lignes[0]?.description || 'Divers',
-      montant: totalTTC,
-      statut:  'En attente',
+    const payload = {
+      client_id:     parseInt(formData.client_id, 10),
+      service:       formData.lignes[0]?.description || 'Divers',
+      statut:        'brouillon',
+      date_creation: formData.date_creation || new Date().toISOString().slice(0, 10),
+      tva:           formData.tva,
+      montant_ht:    sousTotal,
+      montant_tva:   tvaAmount,
+      montant_ttc:   totalTTC,
+      notes:         formData.notes,
+      lignes:        formData.lignes.map(({ description, quantite, prix_unitaire }) => ({
+        description, quantite, prix_unitaire,
+      })),
     }
-
     try {
-      const res = await fetch('/api/devis.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, montant: totalTTC }),
-      })
-      if (res.ok) {
-        const created = await res.json()
-        setDevisList((prev) => [created, ...prev])
-        closeModal()
-        return
-      }
+      const created = await createDevis(payload)
+      setDevisList((prev) => [created, ...prev])
     } catch {
-      /* API indisponible — mise à jour locale */
+      /* Optimiste local si l'API échoue */
+      setDevisList((prev) => [{ ...payload, id: Date.now(), client_nom: '' }, ...prev])
     }
-
-    setDevisList((prev) => [newDevis, ...prev])
     closeModal()
   }
 
-  /* Enregistrer les modifications */
   async function handleUpdate(e) {
     e.preventDefault()
-    const updated = {
-      ...modal.devis,
-      ...formData,
-      service: formData.lignes[0]?.description || modal.devis.service,
-      montant: totalTTC,
+    const payload = {
+      client_id:    parseInt(formData.client_id, 10),
+      service:      formData.lignes[0]?.description || modal.devis.service,
+      tva:          formData.tva,
+      montant_ht:   sousTotal,
+      montant_tva:  tvaAmount,
+      montant_ttc:  totalTTC,
+      notes:        formData.notes,
+      lignes:       formData.lignes.map(({ description, quantite, prix_unitaire }) => ({
+        description, quantite, prix_unitaire,
+      })),
     }
-
     try {
-      await fetch('/api/devis.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      })
-    } catch {
-      /* API indisponible — mise à jour locale */
-    }
-
+      await updateDevis(modal.devis.id, payload)
+    } catch { /* API indisponible */ }
     setDevisList((prev) =>
-      prev.map((d) => (d.id === modal.devis.id ? updated : d))
+      prev.map((d) => (d.id === modal.devis.id ? { ...d, ...payload } : d))
     )
     closeModal()
   }
 
-  /* Supprimer un devis */
   async function handleDelete(id) {
     try {
-      await fetch(`/api/devis.php?id=${id}`, { method: 'DELETE' })
-    } catch {
-      /* API indisponible — suppression locale */
-    }
+      await deleteDevis(id)
+    } catch { /* API indisponible */ }
     setDevisList((prev) => prev.filter((d) => d.id !== id))
     setOpenMenu(null)
   }
 
-  /* Générer le PDF — à implémenter avec une bibliothèque PDF */
   function handleGeneratePDF(devis) {
-    console.info('Génération PDF pour :', devis.client, devis.id)
+    console.info('Génération PDF pour :', devis.client_nom, devis.id)
     setOpenMenu(null)
   }
 
@@ -368,24 +253,18 @@ export default function DevisPage() {
       <div className="dv-page__header">
         <h1 className="dv-page__title">Devis</h1>
 
-        {/* Groupe de boutons */}
         <div className="dv-page__actions">
-          {/* Lien vers le calculateur — construit dans la prochaine étape */}
-          <Link
-            to="/admin/devis/calculateur"
-            className="dv-page__calc-btn"
-          >
-            Calculateur Devis →
+          <Link to="/admin/devis/calculateur" className="dv-page__calc-btn">
+            Calculateur Devis <i className="fas fa-arrow-right"></i>
           </Link>
           <button className="dv-page__new-btn" onClick={openCreateModal}>
-            + Nouveau Devis
+            <i className="fas fa-plus"></i> Nouveau Devis
           </button>
         </div>
       </div>
 
       {/* ── Barre d'outils : recherche + onglets ── */}
       <div className="dv-toolbar">
-        {/* Champ de recherche */}
         <div className="dv-search-wrap">
           <input
             type="search"
@@ -397,16 +276,13 @@ export default function DevisPage() {
           />
         </div>
 
-        {/* Onglets de filtre par statut */}
         <div className="dv-tabs" role="tablist" aria-label="Filtrer par statut">
           {TABS.map(({ label, filter }) => (
             <button
               key={label}
               role="tab"
               aria-selected={activeTab === filter}
-              className={
-                'dv-tab' + (activeTab === filter ? ' dv-tab--active' : '')
-              }
+              className={'dv-tab' + (activeTab === filter ? ' dv-tab--active' : '')}
               onClick={() => setActiveTab(filter)}
             >
               {label}
@@ -440,41 +316,29 @@ export default function DevisPage() {
               ) : (
                 filtered.map((devis) => (
                   <tr key={devis.id}>
-                    {/* Cellule client avec avatar */}
                     <td>
                       <div className="table-client">
                         <span className="table-avatar" aria-hidden="true">
-                          {getInitials(devis.client)}
+                          {getInitials(devis.client_nom)}
                         </span>
-                        <span className="table-client__name">
-                          {devis.client}
-                        </span>
+                        <span className="table-client__name">{devis.client_nom}</span>
                       </div>
                     </td>
 
-                    {/* Date du devis */}
-                    <td>{formatDate(devis.date)}</td>
+                    <td>{formatDate(devis.date_creation)}</td>
 
-                    {/* Service principal */}
                     <td>{devis.service}</td>
 
-                    {/* Montant TTC en rouge gras */}
                     <td>
-                      <span className="dv-montant">
-                        {formatEUR(devis.montant)}
+                      <span className="dv-montant">{formatEUR(devis.montant_ttc)}</span>
+                    </td>
+
+                    <td>
+                      <span className={`status-badge ${statusClass(devis.statut)}`}>
+                        {STATUS_LABEL[devis.statut] ?? devis.statut}
                       </span>
                     </td>
 
-                    {/* Badge de statut */}
-                    <td>
-                      <span
-                        className={`status-badge ${statusClass(devis.statut)}`}
-                      >
-                        {devis.statut}
-                      </span>
-                    </td>
-
-                    {/* Menu d'actions "···" */}
                     <td>
                       <div className="dv-menu-wrap">
                         <button
@@ -482,19 +346,16 @@ export default function DevisPage() {
                             'dv-dots-btn' +
                             (openMenu === devis.id ? ' dv-dots-btn--open' : '')
                           }
-                          aria-label={`Actions pour ${devis.client}`}
+                          aria-label={`Actions pour ${devis.client_nom}`}
                           aria-haspopup="true"
                           aria-expanded={openMenu === devis.id}
                           onClick={() =>
-                            setOpenMenu((prev) =>
-                              prev === devis.id ? null : devis.id
-                            )
+                            setOpenMenu((prev) => prev === devis.id ? null : devis.id)
                           }
                         >
-                          ···
+                          <i className="fas fa-ellipsis-v"></i>
                         </button>
 
-                        {/* Menu déroulant */}
                         {openMenu === devis.id && (
                           <div className="dv-dropdown" role="menu">
                             <button
@@ -502,21 +363,21 @@ export default function DevisPage() {
                               role="menuitem"
                               onClick={() => openEditModal(devis)}
                             >
-                              ✏ Modifier
+                              <i className="fas fa-pen"></i> Modifier
                             </button>
                             <button
                               className="dv-dropdown__item"
                               role="menuitem"
                               onClick={() => handleGeneratePDF(devis)}
                             >
-                              📄 Générer PDF
+                              <i className="fas fa-file-pdf"></i> Générer PDF
                             </button>
                             <button
                               className="dv-dropdown__item dv-dropdown__item--danger"
                               role="menuitem"
                               onClick={() => handleDelete(devis.id)}
                             >
-                              🗑 Supprimer
+                              <i className="fas fa-trash"></i> Supprimer
                             </button>
                           </div>
                         )}
@@ -530,7 +391,6 @@ export default function DevisPage() {
         </div>
       </div>
 
-      {/* ── Couche transparente pour fermer le menu ouvert ── */}
       {openMenu !== null && (
         <div
           className="dv-menu-overlay"
@@ -550,62 +410,49 @@ export default function DevisPage() {
           aria-labelledby="dv-modal-title"
           onClick={closeModal}
         >
-          <div
-            className="dv-modal__dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* En-tête rouge foncé */}
+          <div className="dv-modal__dialog" onClick={(e) => e.stopPropagation()}>
             <div className="dv-modal__header">
               <h2 className="dv-modal__title" id="dv-modal-title">
                 {modal.type === 'create' ? 'Nouveau devis' : 'Modifier le devis'}
               </h2>
-              <button
-                className="dv-modal__close"
-                onClick={closeModal}
-                aria-label="Fermer"
-              >
-                ×
+              <button className="dv-modal__close" onClick={closeModal} aria-label="Fermer">
+                <i className="fas fa-times"></i>
               </button>
             </div>
 
-            {/* Corps — formulaire */}
             <form
               className="dv-modal__body"
               onSubmit={modal.type === 'create' ? handleCreate : handleUpdate}
             >
-              {/* Client + Date sur la même ligne */}
+              {/* Client ID + Date sur la même ligne */}
               <div className="dv-modal__row">
-                {/* Sélection du client */}
                 <div className="dv-modal__field">
-                  <label className="dv-modal__label" htmlFor="dv-client">
-                    Client
+                  <label className="dv-modal__label" htmlFor="dv-client-id">
+                    ID Client
                   </label>
-                  <select
-                    id="dv-client"
-                    name="client"
-                    className="dv-modal__select"
-                    value={formData.client}
+                  <input
+                    id="dv-client-id"
+                    name="client_id"
+                    type="number"
+                    min="1"
+                    className="dv-modal__input"
+                    placeholder="Ex : 12"
+                    value={formData.client_id}
                     onChange={handleFormChange}
                     required
-                  >
-                    <option value="">— Sélectionner —</option>
-                    {CLIENTS_LIST.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
-                {/* Date du devis */}
                 <div className="dv-modal__field">
                   <label className="dv-modal__label" htmlFor="dv-date">
                     Date du devis
                   </label>
                   <input
                     id="dv-date"
-                    name="date"
+                    name="date_creation"
                     type="date"
                     className="dv-modal__input"
-                    value={formData.date}
+                    value={formData.date_creation}
                     onChange={handleFormChange}
                     required
                   />
@@ -617,18 +464,13 @@ export default function DevisPage() {
                 <p className="dv-modal__section-title">Lignes du devis</p>
 
                 <div className="dv-lines">
-                  {/* Tableau des prestations */}
                   <div className="dv-lines__wrap">
                     <table className="dv-lines__table">
                       <thead>
                         <tr>
-                          <th className="dv-lines__col-desc">
-                            Service / Description
-                          </th>
+                          <th className="dv-lines__col-desc">Service / Description</th>
                           <th className="dv-lines__col-qty">Qté</th>
-                          <th className="dv-lines__col-price">
-                            Prix unit. (€)
-                          </th>
+                          <th className="dv-lines__col-price">Prix unit. (€)</th>
                           <th className="dv-lines__col-total">Total</th>
                           <th className="dv-lines__col-del" />
                         </tr>
@@ -651,7 +493,6 @@ export default function DevisPage() {
                         ) : (
                           formData.lignes.map((ligne) => (
                             <tr key={ligne.id}>
-                              {/* Description de la prestation */}
                               <td className="dv-lines__col-desc">
                                 <input
                                   type="text"
@@ -659,59 +500,43 @@ export default function DevisPage() {
                                   placeholder="Description…"
                                   value={ligne.description}
                                   onChange={(e) =>
-                                    handleLigneChange(
-                                      ligne.id,
-                                      'description',
-                                      e.target.value
-                                    )
+                                    handleLigneChange(ligne.id, 'description', e.target.value)
                                   }
                                 />
                               </td>
 
-                              {/* Quantité */}
                               <td className="dv-lines__col-qty">
                                 <input
                                   type="number"
                                   className="dv-lines__input dv-lines__input--number"
                                   min="0"
                                   step="1"
-                                  value={ligne.qte}
+                                  value={ligne.quantite}
                                   onChange={(e) =>
-                                    handleLigneChange(
-                                      ligne.id,
-                                      'qte',
-                                      e.target.value
-                                    )
+                                    handleLigneChange(ligne.id, 'quantite', e.target.value)
                                   }
                                 />
                               </td>
 
-                              {/* Prix unitaire */}
                               <td className="dv-lines__col-price">
                                 <input
                                   type="number"
                                   className="dv-lines__input dv-lines__input--number"
                                   min="0"
                                   step="0.01"
-                                  value={ligne.prixUnit}
+                                  value={ligne.prix_unitaire}
                                   onChange={(e) =>
-                                    handleLigneChange(
-                                      ligne.id,
-                                      'prixUnit',
-                                      e.target.value
-                                    )
+                                    handleLigneChange(ligne.id, 'prix_unitaire', e.target.value)
                                   }
                                 />
                               </td>
 
-                              {/* Total calculé — lecture seule */}
                               <td className="dv-lines__col-total">
                                 <span className="dv-lines__total">
-                                  {formatEUR(ligne.qte * ligne.prixUnit)}
+                                  {formatEUR(ligne.quantite * ligne.prix_unitaire)}
                                 </span>
                               </td>
 
-                              {/* Bouton suppression de la ligne */}
                               <td className="dv-lines__col-del">
                                 <button
                                   type="button"
@@ -719,7 +544,7 @@ export default function DevisPage() {
                                   aria-label="Supprimer cette ligne"
                                   onClick={() => removeLigne(ligne.id)}
                                 >
-                                  ×
+                                  <i className="fas fa-times"></i>
                                 </button>
                               </td>
                             </tr>
@@ -729,22 +554,15 @@ export default function DevisPage() {
                     </table>
                   </div>
 
-                  {/* Bouton ajout d'une nouvelle ligne */}
-                  <button
-                    type="button"
-                    className="dv-lines__add-btn"
-                    onClick={addLigne}
-                  >
-                    + Ajouter une ligne
+                  <button type="button" className="dv-lines__add-btn" onClick={addLigne}>
+                    <i className="fas fa-plus"></i> Ajouter une ligne
                   </button>
                 </div>
               </div>
 
               {/* ── Notes libres ── */}
               <div className="dv-modal__field">
-                <label className="dv-modal__label" htmlFor="dv-notes">
-                  Notes
-                </label>
+                <label className="dv-modal__label" htmlFor="dv-notes">Notes</label>
                 <textarea
                   id="dv-notes"
                   name="notes"
@@ -757,74 +575,48 @@ export default function DevisPage() {
 
               {/* ── Récapitulatif financier ── */}
               <div className="dv-summary">
-                {/* Sous-total hors taxes */}
                 <div className="dv-summary__row">
                   <span className="dv-summary__label">Sous-total HT</span>
-                  <span className="dv-summary__value">
-                    {formatEUR(sousTotal)}
-                  </span>
+                  <span className="dv-summary__value">{formatEUR(sousTotal)}</span>
                 </div>
 
-                {/* Sélection du taux de TVA */}
                 <div className="dv-summary__tva-row">
                   <span className="dv-summary__tva-label">
                     TVA
                     <div className="dv-tva-toggle" role="group" aria-label="Taux de TVA">
                       <button
                         type="button"
-                        className={
-                          'dv-tva-btn' +
-                          (formData.tva === 6 ? ' dv-tva-btn--active' : '')
-                        }
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, tva: 6 }))
-                        }
+                        className={'dv-tva-btn' + (formData.tva === 6 ? ' dv-tva-btn--active' : '')}
+                        onClick={() => setFormData((prev) => ({ ...prev, tva: 6 }))}
                       >
                         6%
                       </button>
                       <button
                         type="button"
-                        className={
-                          'dv-tva-btn' +
-                          (formData.tva === 21 ? ' dv-tva-btn--active' : '')
-                        }
-                        onClick={() =>
-                          setFormData((prev) => ({ ...prev, tva: 21 }))
-                        }
+                        className={'dv-tva-btn' + (formData.tva === 21 ? ' dv-tva-btn--active' : '')}
+                        onClick={() => setFormData((prev) => ({ ...prev, tva: 21 }))}
                       >
                         21%
                       </button>
                     </div>
                   </span>
-                  <span className="dv-summary__value">
-                    {formatEUR(tvaAmount)}
-                  </span>
+                  <span className="dv-summary__value">{formatEUR(tvaAmount)}</span>
                 </div>
 
                 <hr className="dv-summary__divider" />
 
-                {/* Total TTC mis en évidence */}
                 <div className="dv-summary__total-row">
                   <span className="dv-summary__total-label">Total TTC</span>
-                  <span className="dv-summary__total-value">
-                    {formatEUR(totalTTC)}
-                  </span>
+                  <span className="dv-summary__total-value">{formatEUR(totalTTC)}</span>
                 </div>
               </div>
 
-              {/* Pied de modal — annuler / soumettre */}
               <div className="dv-modal__footer">
-                <button
-                  type="button"
-                  className="dv-modal__cancel"
-                  onClick={closeModal}
-                >
+                <button type="button" className="dv-modal__cancel" onClick={closeModal}>
                   Annuler
                 </button>
                 <button type="submit" className="dv-modal__submit">
-                  {modal.type === 'create'
-                    ? 'Créer le devis'
-                    : 'Enregistrer les modifications'}
+                  {modal.type === 'create' ? 'Créer le devis' : 'Enregistrer les modifications'}
                 </button>
               </div>
             </form>

@@ -185,7 +185,7 @@ export default function StatistiquesPage() {
               (kpi.caEvolution >= 0 ? ' st-kpi__sub--green' : ' st-kpi__sub--red')
             }
           >
-            {kpi.caEvolution >= 0 ? '▲' : '▼'}&nbsp;
+            {kpi.caEvolution >= 0 ? <i className="fas fa-caret-up" /> : <i className="fas fa-caret-down" />}&nbsp;
             {Math.abs(kpi.caEvolution)} % vs mois dernier
           </span>
         </div>
@@ -350,8 +350,8 @@ export default function StatistiquesPage() {
                           : ' st-evol--flat')
                       }
                     >
-                      {row.evolution > 0 && '▲ '}
-                      {row.evolution < 0 && '▼ '}
+                      {row.evolution > 0 && <i className="fas fa-caret-up" />}
+                      {row.evolution < 0 && <i className="fas fa-caret-down" />}
                       {row.evolution === 0 ? '—' : `${Math.abs(row.evolution)} %`}
                     </span>
                   </td>

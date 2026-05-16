@@ -1,148 +1,74 @@
-import { useState, useEffect, useCallback } from 'react'
-import './styles/ClientsPage.css'
-
-/* ── Données de démonstration — remplacées par /api/clients.php ── */
-const MOCK_CLIENTS = [
-  {
-    id: 1,
-    nom: 'Jean Dupont',
-    telephone: '+32 475 123 456',
-    email: 'jean.dupont@email.com',
-    localite: 'Namur',
-    statut: 'Confirmé',
-    date: '2026-04-24',
-    notes: '',
-  },
-  {
-    id: 2,
-    nom: 'Marie Martin',
-    telephone: '+32 498 234 567',
-    email: 'marie.martin@email.com',
-    localite: 'Liège',
-    statut: 'Actif',
-    date: '2026-04-22',
-    notes: 'Cliente fidèle depuis 2 ans',
-  },
-  {
-    id: 3,
-    nom: 'Paul Bernard',
-    telephone: '+32 471 345 678',
-    email: 'paul.bernard@email.com',
-    localite: 'Charleroi',
-    statut: 'En attente',
-    date: '2026-04-20',
-    notes: '',
-  },
-  {
-    id: 4,
-    nom: 'Sophie Leroy',
-    telephone: '+32 489 456 789',
-    email: 'sophie.leroy@email.com',
-    localite: 'Bruxelles',
-    statut: 'Confirmé',
-    date: '2026-04-18',
-    notes: 'Préfère les RDV le matin',
-  },
-  {
-    id: 5,
-    nom: 'Luc Moreau',
-    telephone: '+32 476 567 890',
-    email: 'luc.moreau@email.com',
-    localite: 'Mons',
-    statut: 'Annulé',
-    date: '2026-04-15',
-    notes: 'Annulé suite déménagement',
-  },
-  {
-    id: 6,
-    nom: 'Isabelle Simon',
-    telephone: '+32 495 678 901',
-    email: 'isabelle.simon@email.com',
-    localite: 'Namur',
-    statut: 'Nouveau contact',
-    date: '2026-04-12',
-    notes: '',
-  },
-  {
-    id: 7,
-    nom: 'Thomas Petit',
-    telephone: '+32 472 789 012',
-    email: 'thomas.petit@email.com',
-    localite: 'Gembloux',
-    statut: 'Confirmé',
-    date: '2026-04-10',
-    notes: '',
-  },
-  {
-    id: 8,
-    nom: 'Claire Durand',
-    telephone: '+32 499 890 123',
-    email: 'claire.durand@email.com',
-    localite: 'Namur',
-    statut: 'En attente',
-    date: '2026-04-08',
-    notes: 'Devis demandé pour toiture plate',
-  },
-]
+import { useState, useEffect, useCallback } from "react";
+import {
+  getClients,
+  createClient,
+  updateClient,
+  deleteClient,
+} from "../../services/api";
+import "./styles/ClientsPage.css";
 
 /* Onglets de filtre */
 const TABS = [
-  { label: 'Tous',        filter: null },
-  { label: 'En Attente',  filter: 'En attente' },
-  { label: 'Confirmé',    filter: 'Confirmé' },
-  { label: 'Annulé',      filter: 'Annulé' },
-]
+  { label: "Tous",     filter: null },
+  { label: "Nouveau",  filter: "nouveau" },
+  { label: "En attente", filter: "en_cours" },
+  { label: "Terminé",  filter: "termine" },
+  { label: "Annulé",   filter: "annule" },
+];
 
 /* Statuts disponibles dans le formulaire */
-const STATUTS = [
-  'Nouveau contact',
-  'En attente',
-  'Confirmé',
-  'Actif',
-  'Annulé',
-  'Terminé',
-]
+const STATUTS = ["nouveau", "en_cours", "termine", "annule"];
 
 /* Formulaire vide */
 const EMPTY_FORM = {
-  nom: '',
-  telephone: '',
-  email: '',
-  localite: '',
-  statut: 'Nouveau contact',
-  notes: '',
-}
+  nom: "",
+  telephone: "",
+  email: "",
+  ville: "",
+  statut: "nouveau",
+  notes: "",
+};
 
 /* ── Fonctions utilitaires ── */
 
 function getInitials(nom) {
   return nom
-    .split(' ')
+    .split(" ")
     .slice(0, 2)
     .map((p) => p[0])
-    .join('')
-    .toUpperCase()
+    .join("")
+    .toUpperCase();
 }
 
+const STATUS_CLASS = {
+  nouveau:  "status-badge--new",
+  en_cours: "status-badge--pending",
+  termine:  "status-badge--done",
+  annule:   "status-badge--cancelled",
+};
+
+const STATUS_LABEL = {
+  nouveau:  "Nouveau",
+  en_cours: "En attente",
+  termine:  "Terminé",
+  annule:   "Annulé",
+};
+
 function statusClass(statut) {
-  switch (statut) {
-    case 'En attente':     return 'status-badge--pending'
-    case 'Confirmé':       return 'status-badge--confirmed'
-    case 'Annulé':         return 'status-badge--cancelled'
-    case 'Actif':          return 'status-badge--active'
-    case 'Terminé':        return 'status-badge--done'
-    case 'Nouveau contact':return 'status-badge--new'
-    default:               return 'status-badge--new'
-  }
+  return STATUS_CLASS[statut] ?? "status-badge--new";
+}
+
+function statusLabel(statut) {
+  return STATUS_LABEL[statut] ?? statut;
 }
 
 function formatDate(iso) {
-  if (!iso) return '—'
-  return new Date(iso + 'T00:00:00').toLocaleDateString('fr-BE', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
+  if (!iso) return "—";
+  return new Date(iso.replace(" ", "T")).toLocaleDateString("fr-BE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -150,64 +76,59 @@ function formatDate(iso) {
 ══════════════════════════════════════════ */
 export default function ClientsPage() {
   /* ── État ── */
-  const [clients, setClients]   = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [search, setSearch]     = useState('')
-  const [activeTab, setActiveTab] = useState(null)
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState(null);
 
   /* Client sélectionné pour le panneau de détail */
-  const [detail, setDetail] = useState(null)
+  const [detail, setDetail] = useState(null);
 
   /* Modal formulaire : { type: 'create'|'edit'|null, client: null|object } */
-  const [modal, setModal]     = useState({ type: null, client: null })
-  const [formData, setFormData] = useState(EMPTY_FORM)
+  const [modal, setModal] = useState({ type: null, client: null });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   /* ── Chargement des données ── */
   useEffect(() => {
-    async function fetchClients() {
-      try {
-        const res = await fetch('/api/clients.php')
-        if (!res.ok) throw new Error()
-        const json = await res.json()
-        setClients(json)
-      } catch {
-        /* Repli sur les données de démonstration */
-        setClients(MOCK_CLIENTS)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchClients()
-  }, [])
+    getClients()
+      .then(setClients)
+      .catch((err) =>
+        setError(err.message || "Impossible de charger les clients."),
+      )
+      .finally(() => setLoading(false));
+  }, []);
 
   /* ── Verrouillage du défilement quand une modal est ouverte ── */
   useEffect(() => {
-    const isOpen = detail !== null || modal.type !== null
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [detail, modal.type])
+    const isOpen = detail !== null || modal.type !== null;
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [detail, modal.type]);
 
   /* ── Filtrage combiné : recherche + onglet ── */
   const filtered = clients.filter((c) => {
-    const matchSearch = c.nom.toLowerCase().includes(search.toLowerCase())
-    const matchTab    = activeTab === null || c.statut === activeTab
-    return matchSearch && matchTab
-  })
+    const matchSearch = c.nom.toLowerCase().includes(search.toLowerCase());
+    const matchTab = activeTab === null || c.statut === activeTab;
+    return matchSearch && matchTab;
+  });
 
   /* Compteur par statut pour les onglets */
   function countFor(filter) {
     if (!filter) {
       return search
         ? clients.filter((c) =>
-            c.nom.toLowerCase().includes(search.toLowerCase())
+            c.nom.toLowerCase().includes(search.toLowerCase()),
           ).length
-        : clients.length
+        : clients.length;
     }
     return clients.filter(
       (c) =>
         c.statut === filter &&
-        c.nom.toLowerCase().includes(search.toLowerCase())
-    ).length
+        c.nom.toLowerCase().includes(search.toLowerCase()),
+    ).length;
   }
 
   /* ══════════════════════════════
@@ -215,111 +136,99 @@ export default function ClientsPage() {
   ══════════════════════════════ */
 
   function openDetail(client) {
-    setDetail(client)
+    setDetail(client);
   }
 
   const closeDetail = useCallback(() => {
-    setDetail(null)
-  }, [])
+    setDetail(null);
+  }, []);
 
   /* ══════════════════════════════
      Actions CRUD
   ══════════════════════════════ */
 
   function openCreateModal() {
-    setFormData(EMPTY_FORM)
-    setModal({ type: 'create', client: null })
+    setFormData(EMPTY_FORM);
+    setModal({ type: "create", client: null });
   }
 
   function openEditModal(client) {
     setFormData({
-      nom:       client.nom,
+      nom: client.nom,
       telephone: client.telephone,
-      email:     client.email,
-      localite:  client.localite,
-      statut:    client.statut,
-      notes:     client.notes || '',
-    })
-    setModal({ type: 'edit', client })
+      email: client.email,
+      ville: client.ville,
+      statut: client.statut,
+      notes: client.notes || "",
+    });
+    setModal({ type: "edit", client });
     /* Fermer le panneau de détail avant d'ouvrir le formulaire */
-    setDetail(null)
+    setDetail(null);
   }
 
   const closeModal = useCallback(() => {
-    setModal({ type: null, client: null })
-  }, [])
+    setModal({ type: null, client: null });
+  }, []);
 
   function handleFormChange(e) {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
   /* Créer un nouveau client */
   async function handleCreate(e) {
-    e.preventDefault()
-    const newClient = { ...formData, id: Date.now(), date: new Date().toISOString().slice(0, 10) }
-
+    e.preventDefault();
     try {
-      const res = await fetch('/api/clients.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-      if (res.ok) {
-        const created = await res.json()
-        setClients((prev) => [created, ...prev])
-        closeModal()
-        return
-      }
-    } catch {
-      /* API indisponible — mise à jour locale */
+      const created = await createClient(formData);
+      setClients((prev) => [created, ...prev]);
+      closeModal();
+    } catch (err) {
+      setError(err.message || "Erreur lors de la création du client.");
     }
-
-    setClients((prev) => [newClient, ...prev])
-    closeModal()
   }
 
   /* Enregistrer les modifications */
   async function handleUpdate(e) {
-    e.preventDefault()
-    const updated = { ...modal.client, ...formData }
-
+    e.preventDefault();
     try {
-      await fetch('/api/clients.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      })
-    } catch {
-      /* API indisponible — mise à jour locale */
+      const updated = await updateClient(modal.client.id, formData);
+      setClients((prev) =>
+        prev.map((c) => (c.id === modal.client.id ? updated : c)),
+      );
+      closeModal();
+    } catch (err) {
+      setError(err.message || "Erreur lors de la mise à jour du client.");
     }
-
-    setClients((prev) =>
-      prev.map((c) => (c.id === modal.client.id ? updated : c))
-    )
-    closeModal()
   }
 
   /* Supprimer un client */
   async function handleDelete(id) {
     try {
-      await fetch(`/api/clients.php?id=${id}`, { method: 'DELETE' })
-    } catch {
-      /* API indisponible — suppression locale */
+      await deleteClient(id);
+      setClients((prev) => prev.filter((c) => c.id !== id));
+      closeDetail();
+    } catch (err) {
+      setError(err.message || "Erreur lors de la suppression du client.");
     }
-    setClients((prev) => prev.filter((c) => c.id !== id))
-    closeDetail()
   }
 
   /* ── Rendu ── */
   if (loading) {
     return (
       <div className="cli-page">
-        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.875rem' }}>
+        <p style={{ color: "rgba(0,0,0,0.4)", fontSize: "0.875rem" }}>
           Chargement…
         </p>
       </div>
-    )
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="cli-page">
+        <p style={{ color: "#c0392b", fontSize: "0.875rem" }}>{error}</p>
+      </div>
+    );
   }
 
   return (
@@ -328,7 +237,7 @@ export default function ClientsPage() {
       <div className="cli-page__header">
         <h1 className="cli-page__title">Clients</h1>
         <button className="cli-page__new-btn" onClick={openCreateModal}>
-          + Nouveau client
+          <i className="fas fa-plus"></i> Nouveau client
         </button>
       </div>
 
@@ -352,7 +261,7 @@ export default function ClientsPage() {
             role="tab"
             aria-selected={activeTab === filter}
             className={
-              'cli-tab' + (activeTab === filter ? ' cli-tab--active' : '')
+              "cli-tab" + (activeTab === filter ? " cli-tab--active" : "")
             }
             onClick={() => setActiveTab(filter)}
           >
@@ -398,17 +307,17 @@ export default function ClientsPage() {
                     </td>
 
                     {/* Localité */}
-                    <td>{client.localite}</td>
+                    <td>{client.ville}</td>
 
                     {/* Date d'ajout */}
-                    <td>{formatDate(client.date)}</td>
+                    <td>{formatDate(client.date_creation)}</td>
 
                     {/* Badge de statut */}
                     <td>
                       <span
                         className={`status-badge ${statusClass(client.statut)}`}
                       >
-                        {client.statut}
+                        {statusLabel(client.statut)}
                       </span>
                     </td>
 
@@ -420,7 +329,7 @@ export default function ClientsPage() {
                         aria-label={`Voir le profil de ${client.nom}`}
                         onClick={() => openDetail(client)}
                       >
-                        ℹ
+                        <i className="fas fa-info-circle"></i>
                       </button>
                     </td>
                   </tr>
@@ -438,9 +347,9 @@ export default function ClientsPage() {
         {filtered.length === 0 && (
           <p
             style={{
-              textAlign: 'center',
-              color: 'rgba(0,0,0,0.35)',
-              fontSize: '0.875rem',
+              textAlign: "center",
+              color: "rgba(0,0,0,0.35)",
+              fontSize: "0.875rem",
             }}
           >
             Aucun client trouvé.
@@ -455,7 +364,7 @@ export default function ClientsPage() {
             tabIndex={0}
             aria-label={`Voir le profil de ${client.nom}`}
             onClick={() => openDetail(client)}
-            onKeyDown={(e) => e.key === 'Enter' && openDetail(client)}
+            onKeyDown={(e) => e.key === "Enter" && openDetail(client)}
           >
             {/* Avatar initiales */}
             <span className="table-avatar" aria-hidden="true">
@@ -466,13 +375,13 @@ export default function ClientsPage() {
             <div className="cli-card__info">
               <p className="cli-card__name">{client.nom}</p>
               <p className="cli-card__meta">
-                {client.localite} · {formatDate(client.date)}
+                {client.ville} · {formatDate(client.date_creation)}
               </p>
             </div>
 
             {/* Badge de statut */}
             <span className={`status-badge ${statusClass(client.statut)}`}>
-              {client.statut}
+              {statusLabel(client.statut)}
             </span>
           </div>
         ))}
@@ -501,7 +410,7 @@ export default function ClientsPage() {
                 onClick={closeDetail}
                 aria-label="Fermer"
               >
-                ×
+                <i className="fas fa-times"></i>
               </button>
               <div className="cli-detail__avatar" aria-hidden="true">
                 {getInitials(detail.nom)}
@@ -509,10 +418,8 @@ export default function ClientsPage() {
               <h2 className="cli-detail__name" id="cli-detail-name">
                 {detail.nom}
               </h2>
-              <span
-                className={`status-badge ${statusClass(detail.statut)}`}
-              >
-                {detail.statut}
+              <span className={`status-badge ${statusClass(detail.statut)}`}>
+                {statusLabel(detail.statut)}
               </span>
             </div>
 
@@ -521,12 +428,12 @@ export default function ClientsPage() {
               {/* Téléphone */}
               <div className="cli-detail__row">
                 <span className="cli-detail__row-icon" aria-hidden="true">
-                  📞
+                  <i className="fas fa-phone"></i>
                 </span>
                 <div>
                   <p className="cli-detail__row-label">Téléphone</p>
                   <p className="cli-detail__row-value">
-                    {detail.telephone || '—'}
+                    {detail.telephone || "—"}
                   </p>
                 </div>
               </div>
@@ -534,38 +441,34 @@ export default function ClientsPage() {
               {/* Email */}
               <div className="cli-detail__row">
                 <span className="cli-detail__row-icon" aria-hidden="true">
-                  ✉
+                  <i className="fas fa-envelope"></i>
                 </span>
                 <div>
                   <p className="cli-detail__row-label">Email</p>
-                  <p className="cli-detail__row-value">
-                    {detail.email || '—'}
-                  </p>
+                  <p className="cli-detail__row-value">{detail.email || "—"}</p>
                 </div>
               </div>
 
               {/* Localité */}
               <div className="cli-detail__row">
                 <span className="cli-detail__row-icon" aria-hidden="true">
-                  📍
+                  <i className="fas fa-map-marker-alt"></i>
                 </span>
                 <div>
                   <p className="cli-detail__row-label">Localité</p>
-                  <p className="cli-detail__row-value">
-                    {detail.localite || '—'}
-                  </p>
+                  <p className="cli-detail__row-value">{detail.ville || "—"}</p>
                 </div>
               </div>
 
               {/* Date d'ajout */}
               <div className="cli-detail__row">
                 <span className="cli-detail__row-icon" aria-hidden="true">
-                  📅
+                  <i className="fas fa-calendar-alt"></i>
                 </span>
                 <div>
                   <p className="cli-detail__row-label">Ajouté le</p>
                   <p className="cli-detail__row-value">
-                    {formatDate(detail.date)}
+                    {formatDate(detail.date_creation)}
                   </p>
                 </div>
               </div>
@@ -576,7 +479,7 @@ export default function ClientsPage() {
                   <hr className="cli-detail__divider" />
                   <div className="cli-detail__row">
                     <span className="cli-detail__row-icon" aria-hidden="true">
-                      📝
+                      <i className="fas fa-sticky-note"></i>
                     </span>
                     <div>
                       <p className="cli-detail__row-label">Notes</p>
@@ -626,21 +529,23 @@ export default function ClientsPage() {
             {/* En-tête rouge foncé */}
             <div className="cli-modal__header">
               <h2 className="cli-modal__title" id="cli-modal-title">
-                {modal.type === 'create' ? 'Nouveau client' : 'Modifier le client'}
+                {modal.type === "create"
+                  ? "Nouveau client"
+                  : "Modifier le client"}
               </h2>
               <button
                 className="cli-modal__close"
                 onClick={closeModal}
                 aria-label="Fermer"
               >
-                ×
+                <i className="fas fa-times"></i>
               </button>
             </div>
 
             {/* Corps — formulaire */}
             <form
               className="cli-modal__body"
-              onSubmit={modal.type === 'create' ? handleCreate : handleUpdate}
+              onSubmit={modal.type === "create" ? handleCreate : handleUpdate}
             >
               {/* Nom complet */}
               <div className="cli-modal__field">
@@ -693,16 +598,16 @@ export default function ClientsPage() {
 
               {/* Localité */}
               <div className="cli-modal__field">
-                <label className="cli-modal__label" htmlFor="cli-localite">
+                <label className="cli-modal__label" htmlFor="cli-ville">
                   Localité
                 </label>
                 <input
-                  id="cli-localite"
-                  name="localite"
+                  id="cli-ville"
+                  name="ville"
                   type="text"
                   className="cli-modal__input"
                   placeholder="Ville ou commune"
-                  value={formData.localite}
+                  value={formData.ville}
                   onChange={handleFormChange}
                 />
               </div>
@@ -752,9 +657,9 @@ export default function ClientsPage() {
                   Annuler
                 </button>
                 <button type="submit" className="cli-modal__submit">
-                  {modal.type === 'create'
-                    ? 'Créer le client'
-                    : 'Enregistrer les modifications'}
+                  {modal.type === "create"
+                    ? "Créer le client"
+                    : "Enregistrer les modifications"}
                 </button>
               </div>
             </form>
@@ -762,5 +667,5 @@ export default function ClientsPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

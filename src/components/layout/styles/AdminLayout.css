@@ -373,3 +373,37 @@
     padding-bottom: 56px;
   }
 }
+
+/* ── Icônes d'action partagées (info, édition, visualisation) ── */
+.fa-calendar-alt {
+  color: #7c3aed;
+  transition: color 0.15s ease;
+}
+
+.fa-calendar-alt:hover {
+  color: #5b21b6;
+}
+
+.fa-trash {
+  color: #dc2626;
+  transition: color 0.15s ease;
+}
+
+.fa-trash:hover {
+  color: #991b1b;
+}
+
+.fa-info-circle,
+.fa-pen,
+.fa-eye,
+.fa-ellipsis-v {
+  color: #1a73e8;
+  transition: color 0.15s ease;
+}
+
+.fa-info-circle:hover,
+.fa-pen:hover,
+.fa-eye:hover,
+.fa-ellipsis-v:hover {
+  color: #1558b0;
+}

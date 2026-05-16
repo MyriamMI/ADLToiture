@@ -39,9 +39,10 @@
  */
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-// Adjust the allowed origin to match your front-end URL in production.
-$allowedOrigin = 'http://localhost:5173';
-header("Access-Control-Allow-Origin: {$allowedOrigin}");
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (str_contains($origin, 'localhost')) {
+    header("Access-Control-Allow-Origin: $origin");
+}
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Credentials: true');
@@ -77,9 +78,14 @@ if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
     $body = json_decode($raw, true) ?? [];
 }
 
+// ── DEBUG temporaire ──────────────────────────────────────────────────────────
+error_log("[ROUTER] uri=$requestUri base=$base path=$path segments=" . implode('|', $segments));
+error_log("[ROUTER] method=$method resource=$resource id=" . var_export($id, true) . " action=$action body=" . json_encode($body));
+
 // ── Controller map ────────────────────────────────────────────────────────────
 $controllerMap = [
     'auth'     => 'AuthController',
+    'kpi'      => 'KpiController',
     'demandes' => 'DemandesController',
     'clients'  => 'ClientsController',
     'rdv'      => 'RdvController',
@@ -101,6 +107,16 @@ try {
     $ctrl = new $controllerMap[$resource]();
 
     switch ($resource) {
+
+        // --- KPI ------------------------------------------------------------
+        case 'kpi':
+            if ($method === 'GET') {
+                $ctrl->get();
+            } else {
+                http_response_code(405);
+                echo json_encode(['error' => 'Method not allowed']);
+            }
+            break;
 
         // --- Auth -----------------------------------------------------------
         // /auth/login and /auth/logout → $segments[1] holds the sub-action,
@@ -131,6 +147,8 @@ try {
                 $ctrl->create($body);
             } elseif (in_array($method, ['PUT', 'PATCH'], true) && $id !== null && $action === 'statut') {
                 $ctrl->updateStatut($id, $body);
+            } elseif ($method === 'DELETE' && $id !== null) {
+                $ctrl->delete($id);
             } else {
                 http_response_code(405);
                 echo json_encode(['error' => 'Method or route not allowed']);

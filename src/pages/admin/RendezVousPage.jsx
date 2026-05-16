@@ -1,310 +1,236 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { getRdv, createRdv, updateRdv, deleteRdv, exportIcal } from '../../services/api'
 import './styles/RendezVousPage.css'
 
-/* ── Données de démonstration ── */
-const MOCK_RDV = [
-  {
-    id: 1,
-    client: 'Jean Dupont',
-    date: '2026-04-28',
-    service: 'Rénovation toiture',
-    statut: 'En attente',
-    notes: '',
-  },
-  {
-    id: 2,
-    client: 'Marie Martin',
-    date: '2026-04-29',
-    service: 'Pose neuve',
-    statut: 'Confirmé',
-    notes: 'Disponible matin uniquement',
-  },
-  {
-    id: 3,
-    client: 'Paul Bernard',
-    date: '2026-04-30',
-    service: 'Zinguerie',
-    statut: 'En cours',
-    notes: '',
-  },
-  {
-    id: 4,
-    client: 'Sophie Leroy',
-    date: '2026-05-02',
-    service: 'Isolation combles',
-    statut: 'Confirmé',
-    notes: '',
-  },
-  {
-    id: 5,
-    client: 'Luc Moreau',
-    date: '2026-05-03',
-    service: 'Nettoyage toiture',
-    statut: 'Annulé',
-    notes: 'Annulé par téléphone le 26/04',
-  },
-  {
-    id: 6,
-    client: 'Isabelle Simon',
-    date: '2026-05-05',
-    service: 'Inspection toiture',
-    statut: 'En attente',
-    notes: '',
-  },
-  {
-    id: 7,
-    client: 'Thomas Petit',
-    date: '2026-05-07',
-    service: 'Traitement hydrofuge',
-    statut: 'Confirmé',
-    notes: '',
-  },
-]
+function ActionMenu({ row, openMenu, setOpenMenu, onEdit, onDelete }) {
+  const isOpen = openMenu === row.id
+  const btnRef = useRef(null)
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 })
 
-/* Liste de clients disponibles pour la sélection */
-const CLIENTS_LIST = [
-  'Jean Dupont',
-  'Marie Martin',
-  'Paul Bernard',
-  'Sophie Leroy',
-  'Luc Moreau',
-  'Isabelle Simon',
-  'Thomas Petit',
-  'Claire Durand',
-]
+  useEffect(() => {
+    if (isOpen && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setDropPos({ top: rect.bottom + 4, left: rect.right - 160 })
+    }
+  }, [isOpen])
 
-/* Types de service proposés */
-const SERVICES_LIST = [
-  'Rénovation toiture',
-  'Pose neuve',
-  'Zinguerie',
-  'Isolation combles',
-  'Nettoyage toiture',
-  'Réparation urgence',
-  'Inspection toiture',
-  'Traitement hydrofuge',
-]
-
-/* Onglets de filtre et statuts correspondants */
-const TABS = [
-  { label: 'Tous',        filter: null },
-  { label: 'En attente',  filter: 'En attente' },
-  { label: 'Confirmé',    filter: 'Confirmé' },
-  { label: 'Annulé',      filter: 'Annulé' },
-]
-
-/* Formulaire vide pour la création */
-const EMPTY_FORM = {
-  client: '',
-  date: '',
-  service: '',
-  statut: 'En attente',
-  notes: '',
+  return (
+    <div className="rdv-menu-wrap">
+      <button
+        ref={btnRef}
+        className={'rdv-dots-btn' + (isOpen ? ' rdv-dots-btn--open' : '')}
+        aria-label={`Actions pour ${row.client_nom}`}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        onClick={() => setOpenMenu((prev) => (prev === row.id ? null : row.id))}
+      >
+        <i className="fas fa-ellipsis-v"></i>
+      </button>
+      {isOpen && (
+        <div className="rdv-dropdown" role="menu" style={{ top: dropPos.top, left: dropPos.left }}>
+          <button className="rdv-dropdown__item" role="menuitem" onClick={() => onEdit(row)}>
+            <i className="fas fa-pen"></i> Modifier
+          </button>
+          {row.statut === 'confirme' && (
+            <a
+              className="rdv-dropdown__item rdv-dropdown__item--ical"
+              href={exportIcal(row.id)}
+              download
+              onClick={() => setOpenMenu(null)}
+            >
+              <i className="fas fa-calendar-download"></i> Export iCal
+            </a>
+          )}
+          <button
+            className="rdv-dropdown__item rdv-dropdown__item--danger"
+            role="menuitem"
+            onClick={() => onDelete(row.id)}
+          >
+            <i className="fas fa-trash"></i> Supprimer
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }
 
-/* ── Fonctions utilitaires ── */
+const SERVICES_LIST = [
+  'Rénovation toiture', 'Pose neuve', 'Zinguerie', 'Isolation combles',
+  'Nettoyage toiture', 'Réparation urgence', 'Inspection toiture', 'Traitement hydrofuge',
+]
+
+const STATUS_LABEL = {
+  en_attente: 'En attente',
+  confirme:   'Confirmé',
+  annule:     'Annulé',
+  termine:    'Terminé',
+}
+
+const TABS = [
+  { label: 'Tous',       filter: null },
+  { label: 'En attente', filter: 'en_attente' },
+  { label: 'Confirmé',   filter: 'confirme' },
+  { label: 'Annulé',     filter: 'annule' },
+]
+
+const EMPTY_FORM = {
+  client_id:   '',
+  service:     '',
+  date_rdv:    '',
+  heure_debut: '',
+  heure_fin:   '',
+  statut:      'en_attente',
+  notes:       '',
+}
 
 function getInitials(name) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase()
+  if (!name) return '?'
+  return String(name).split(' ').slice(0, 2).map((p) => p[0]).join('').toUpperCase()
 }
 
 function statusClass(statut) {
   switch (statut) {
-    case 'En attente': return 'status-badge--pending'
-    case 'Confirmé':   return 'status-badge--confirmed'
-    case 'Annulé':     return 'status-badge--cancelled'
-    case 'En cours':   return 'status-badge--in-progress'
-    case 'Terminé':    return 'status-badge--done'
-    default:           return 'status-badge--done'
+    case 'en_attente': return 'status-badge--pending'
+    case 'confirme':   return 'status-badge--confirmed'
+    case 'annule':     return 'status-badge--cancelled'
+    case 'termine':    return 'status-badge--done'
+    default:           return 'status-badge--pending'
   }
 }
 
-/* Formate une date ISO en format court français */
 function formatDate(iso) {
   if (!iso) return '—'
-  return new Date(iso + 'T00:00:00').toLocaleDateString('fr-BE', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+  return new Date(iso.replace(' ', 'T')).toLocaleDateString('fr-BE', {
+    day: 'numeric', month: 'short', year: 'numeric',
   })
 }
 
-/* ══════════════════════════════════════════
-   Composant principal
-══════════════════════════════════════════ */
 export default function RendezVousPage() {
-  /* ── État principal ── */
-  const [rdvList, setRdvList] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [rdvList, setRdvList]       = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState(null)
+  const [activeTab, setActiveTab]   = useState(null)
+  const [openMenu, setOpenMenu]     = useState(null)
+  const [modal, setModal]           = useState({ type: null, item: null })
+  const [formData, setFormData]     = useState(EMPTY_FORM)
+  const [submitting, setSubmitting] = useState(false)
 
-  /* Onglet de filtre actif */
-  const [activeTab, setActiveTab] = useState(null)
-
-  /* Id du RDV dont le menu "···" est ouvert (null = aucun) */
-  const [openMenu, setOpenMenu] = useState(null)
-
-  /* Modal : { type: 'create'|'edit'|null, item: object|null } */
-  const [modal, setModal] = useState({ type: null, item: null })
-
-  /* Valeurs du formulaire de la modal */
-  const [formData, setFormData] = useState(EMPTY_FORM)
-
-  /* ── Chargement des données ── */
   useEffect(() => {
-    async function fetchRdv() {
-      try {
-        const res = await fetch('/api/rdv.php')
-        if (!res.ok) throw new Error()
-        const json = await res.json()
-        setRdvList(json)
-      } catch {
-        /* Repli sur les données de démonstration */
-        setRdvList(MOCK_RDV)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchRdv()
+    getRdv()
+      .then(setRdvList)
+      .catch((err) => setError(err.message || 'Impossible de charger les rendez-vous.'))
+      .finally(() => setLoading(false))
   }, [])
 
-  /* ── Verrouillage du défilement quand la modal est ouverte ── */
   useEffect(() => {
     document.body.style.overflow = modal.type ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
+    return () => { document.body.style.overflow = '' }
   }, [modal.type])
 
-  /* ── Filtrage côté client ── */
   const visibleRdv = activeTab
     ? rdvList.filter((r) => r.statut === activeTab)
     : rdvList
 
-  /* ── Compteur par statut pour les onglets ── */
   function countFor(filter) {
     return filter ? rdvList.filter((r) => r.statut === filter).length : rdvList.length
   }
 
-  /* ══════════════════════════════
-     Actions CRUD
-  ══════════════════════════════ */
-
-  /* Ouvrir la modal de création */
   function openCreateModal() {
     setFormData(EMPTY_FORM)
     setModal({ type: 'create', item: null })
   }
 
-  /* Ouvrir la modal de modification */
   function openEditModal(item) {
     setFormData({
-      client: item.client,
-      date: item.date,
-      service: item.service,
-      statut: item.statut,
-      notes: item.notes || '',
+      client_id:   item.client_id,
+      service:     item.service      ?? '',
+      date_rdv:    item.date_rdv     ?? '',
+      heure_debut: item.heure_debut  ?? '',
+      heure_fin:   item.heure_fin    ?? '',
+      statut:      item.statut       ?? 'en_attente',
+      notes:       item.notes        ?? '',
     })
     setModal({ type: 'edit', item })
     setOpenMenu(null)
   }
 
-  /* Fermer la modal */
   const closeModal = useCallback(() => {
     setModal({ type: null, item: null })
   }, [])
 
-  /* Mise à jour des champs du formulaire */
   function handleFormChange(e) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  /* Créer un nouveau RDV */
   async function handleCreate(e) {
     e.preventDefault()
-    const newItem = { ...formData, id: Date.now() }
-
+    setSubmitting(true)
     try {
-      const res = await fetch('/api/rdv.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      await createRdv({
+        ...formData,
+        date_demande: new Date().toISOString().slice(0, 10),
       })
-      if (res.ok) {
-        const created = await res.json()
-        setRdvList((prev) => [...prev, created])
-        closeModal()
-        return
-      }
-    } catch {
-      /* API indisponible — mise à jour locale uniquement */
+      const all = await getRdv()
+      setRdvList(all)
+      closeModal()
+    } catch (err) {
+      setError(err.message || 'Erreur lors de la création.')
+    } finally {
+      setSubmitting(false)
     }
-
-    setRdvList((prev) => [...prev, newItem])
-    closeModal()
   }
 
-  /* Enregistrer les modifications d'un RDV */
   async function handleUpdate(e) {
     e.preventDefault()
-    const updated = { ...modal.item, ...formData }
-
+    setSubmitting(true)
     try {
-      await fetch('/api/rdv.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      })
-    } catch {
-      /* API indisponible — mise à jour locale uniquement */
+      await updateRdv(modal.item.id, formData)
+      setRdvList((prev) =>
+        prev.map((r) => (r.id === modal.item.id ? { ...r, ...formData } : r))
+      )
+      closeModal()
+    } catch (err) {
+      setError(err.message || 'Erreur lors de la mise à jour.')
+    } finally {
+      setSubmitting(false)
     }
-
-    setRdvList((prev) =>
-      prev.map((r) => (r.id === modal.item.id ? updated : r))
-    )
-    closeModal()
   }
 
-  /* Supprimer un RDV */
   async function handleDelete(id) {
-    try {
-      await fetch(`/api/rdv.php?id=${id}`, { method: 'DELETE' })
-    } catch {
-      /* API indisponible — suppression locale uniquement */
-    }
-    setRdvList((prev) => prev.filter((r) => r.id !== id))
     setOpenMenu(null)
+    try {
+      await deleteRdv(id)
+      setRdvList((prev) => prev.filter((r) => r.id !== id))
+    } catch (err) {
+      setError(err.message || 'Erreur lors de la suppression.')
+    }
   }
 
-  /* ── Rendu ── */
   if (loading) {
     return (
       <div className="rdv-page">
-        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.875rem' }}>
-          Chargement…
-        </p>
+        <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '0.875rem' }}>Chargement…</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rdv-page">
+        <p style={{ color: '#c0392b', fontSize: '0.875rem' }}>{error}</p>
       </div>
     )
   }
 
   return (
     <div className="rdv-page">
-      {/* ── En-tête de page ── */}
+
+      {/* ── En-tête ── */}
       <div className="rdv-page__header">
         <h1 className="rdv-page__title">Rendez-vous</h1>
-        <button
-          style={{ background: 'transparent', border: '2px solid #550101', color: '#550101', borderRadius: '8px', padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}
-          onClick={() => window.open('/api/rdv/export-ical.php', '_blank')}
-        >
-          📅 Exporter confirmés
-        </button>
         <button className="rdv-page__new-btn" onClick={openCreateModal}>
-          + Nouveau Rendez-vous
+          <i className="fas fa-plus"></i> Nouveau rendez-vous
         </button>
       </div>
 
@@ -315,9 +241,7 @@ export default function RendezVousPage() {
             key={label}
             role="tab"
             aria-selected={activeTab === filter}
-            className={
-              'rdv-tab' + (activeTab === filter ? ' rdv-tab--active' : '')
-            }
+            className={'rdv-tab' + (activeTab === filter ? ' rdv-tab--active' : '')}
             onClick={() => setActiveTab(filter)}
           >
             {label}
@@ -336,6 +260,7 @@ export default function RendezVousPage() {
               <tr>
                 <th>Client</th>
                 <th>Date</th>
+                <th>Horaire</th>
                 <th>Service</th>
                 <th>Statut</th>
                 <th>Actions</th>
@@ -344,76 +269,41 @@ export default function RendezVousPage() {
             <tbody>
               {visibleRdv.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="rdv-table__empty">
+                  <td colSpan={6} className="rdv-table__empty">
                     Aucun rendez-vous pour ce filtre.
                   </td>
                 </tr>
               ) : (
                 visibleRdv.map((row) => (
                   <tr key={row.id}>
-                    {/* Cellule client avec avatar initiales */}
                     <td>
                       <div className="table-client">
                         <span className="table-avatar" aria-hidden="true">
-                          {getInitials(row.client)}
+                          {getInitials(row.client_nom)}
                         </span>
-                        <span className="table-client__name">{row.client}</span>
+                        <span className="table-client__name">{row.client_nom}</span>
                       </div>
                     </td>
-
-                    {/* Date du rendez-vous */}
-                    <td>{formatDate(row.date)}</td>
-
-                    {/* Type de prestation */}
+                    <td>{formatDate(row.date_rdv)}</td>
+                    <td>
+                      {row.heure_debut
+                        ? `${row.heure_debut}${row.heure_fin ? ` – ${row.heure_fin}` : ''}`
+                        : '—'}
+                    </td>
                     <td>{row.service}</td>
-
-                    {/* Badge de statut */}
                     <td>
                       <span className={`status-badge ${statusClass(row.statut)}`}>
-                        {row.statut}
+                        {STATUS_LABEL[row.statut] ?? row.statut}
                       </span>
                     </td>
-
-                    {/* Menu d'actions "···" */}
                     <td>
-                      <div className="rdv-menu-wrap">
-                        <button
-                          className={
-                            'rdv-dots-btn' +
-                            (openMenu === row.id ? ' rdv-dots-btn--open' : '')
-                          }
-                          aria-label={`Actions pour ${row.client}`}
-                          aria-haspopup="true"
-                          aria-expanded={openMenu === row.id}
-                          onClick={() =>
-                            setOpenMenu((prev) =>
-                              prev === row.id ? null : row.id
-                            )
-                          }
-                        >
-                          ···
-                        </button>
-
-                        {/* Menu déroulant */}
-                        {openMenu === row.id && (
-                          <div className="rdv-dropdown" role="menu">
-                            <button
-                              className="rdv-dropdown__item"
-                              role="menuitem"
-                              onClick={() => openEditModal(row)}
-                            >
-                              ✏ Modifier
-                            </button>
-                            <button
-                              className="rdv-dropdown__item rdv-dropdown__item--danger"
-                              role="menuitem"
-                              onClick={() => handleDelete(row.id)}
-                            >
-                              🗑 Supprimer
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <ActionMenu
+                        row={row}
+                        openMenu={openMenu}
+                        setOpenMenu={setOpenMenu}
+                        onEdit={openEditModal}
+                        onDelete={handleDelete}
+                      />
                     </td>
                   </tr>
                 ))
@@ -434,66 +324,45 @@ export default function RendezVousPage() {
         )}
         {visibleRdv.map((row) => (
           <div className="rdv-card" key={row.id}>
-            {/* En-tête de carte : client + statut */}
             <div className="rdv-card__header">
               <div className="table-client">
                 <span className="table-avatar" aria-hidden="true">
-                  {getInitials(row.client)}
+                  {getInitials(row.client_nom)}
                 </span>
-                <span className="table-client__name">{row.client}</span>
+                <span className="table-client__name">{row.client_nom}</span>
               </div>
               <span className={`status-badge ${statusClass(row.statut)}`}>
-                {row.statut}
+                {STATUS_LABEL[row.statut] ?? row.statut}
               </span>
             </div>
-
-            {/* Métadonnées : date et service */}
             <div className="rdv-card__meta">
-              <span className="rdv-card__meta-item">📅 {formatDate(row.date)}</span>
-              <span className="rdv-card__meta-item">🔧 {row.service}</span>
+              <span className="rdv-card__meta-item">
+                <i className="fas fa-calendar-alt"></i> {formatDate(row.date_rdv)}
+              </span>
+              {row.heure_debut && (
+                <span className="rdv-card__meta-item">
+                  <i className="fas fa-clock"></i>
+                  {row.heure_debut}{row.heure_fin ? ` – ${row.heure_fin}` : ''}
+                </span>
+              )}
+              <span className="rdv-card__meta-item">
+                <i className="fas fa-wrench"></i> {row.service}
+              </span>
             </div>
-
-            {/* Menu d'actions */}
             <div className="rdv-card__footer">
-              <div className="rdv-menu-wrap">
-                <button
-                  className={
-                    'rdv-dots-btn' +
-                    (openMenu === row.id ? ' rdv-dots-btn--open' : '')
-                  }
-                  aria-label={`Actions pour ${row.client}`}
-                  onClick={() =>
-                    setOpenMenu((prev) => (prev === row.id ? null : row.id))
-                  }
-                >
-                  ···
-                </button>
-
-                {openMenu === row.id && (
-                  <div className="rdv-dropdown" role="menu">
-                    <button
-                      className="rdv-dropdown__item"
-                      role="menuitem"
-                      onClick={() => openEditModal(row)}
-                    >
-                      ✏ Modifier
-                    </button>
-                    <button
-                      className="rdv-dropdown__item rdv-dropdown__item--danger"
-                      role="menuitem"
-                      onClick={() => handleDelete(row.id)}
-                    >
-                      🗑 Supprimer
-                    </button>
-                  </div>
-                )}
-              </div>
+              <ActionMenu
+                row={row}
+                openMenu={openMenu}
+                setOpenMenu={setOpenMenu}
+                onEdit={openEditModal}
+                onDelete={handleDelete}
+              />
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Couche transparente pour fermer le menu ouvert ── */}
+      {/* ── Overlay fermeture menu ── */}
       {openMenu !== null && (
         <div
           className="rdv-menu-overlay"
@@ -503,10 +372,9 @@ export default function RendezVousPage() {
       )}
 
       {/* ══════════════════════════════
-          Modal — Nouveau / Modifier rendez-vous
+          Modal — Nouveau / Modifier
       ══════════════════════════════ */}
       {modal.type !== null && (
-        /* Fermeture en cliquant sur le fond */
         <div
           className="rdv-modal"
           role="dialog"
@@ -514,73 +382,84 @@ export default function RendezVousPage() {
           aria-labelledby="rdv-modal-title"
           onClick={closeModal}
         >
-          <div
-            className="rdv-modal__dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* En-tête rouge foncé */}
+          <div className="rdv-modal__dialog" onClick={(e) => e.stopPropagation()}>
+
             <div className="rdv-modal__header">
               <h2 className="rdv-modal__title" id="rdv-modal-title">
-                {modal.type === 'create'
-                  ? 'Nouveau rendez-vous'
-                  : 'Modifier le rendez-vous'}
+                {modal.type === 'create' ? 'Nouveau rendez-vous' : 'Modifier le rendez-vous'}
               </h2>
-              <button
-                className="rdv-modal__close"
-                onClick={closeModal}
-                aria-label="Fermer"
-              >
-                ×
+              <button className="rdv-modal__close" onClick={closeModal} aria-label="Fermer">
+                <i className="fas fa-times"></i>
               </button>
             </div>
 
-            {/* Corps — formulaire */}
             <form
               className="rdv-modal__body"
               onSubmit={modal.type === 'create' ? handleCreate : handleUpdate}
             >
-              {/* Sélection du client */}
               <div className="rdv-modal__field">
-                <label className="rdv-modal__label" htmlFor="rdv-client">
-                  Client
-                </label>
-                <select
-                  id="rdv-client"
-                  name="client"
-                  className="rdv-modal__select"
-                  value={formData.client}
-                  onChange={handleFormChange}
-                  required
-                >
-                  <option value="">— Sélectionner un client —</option>
-                  {CLIENTS_LIST.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Date du rendez-vous */}
-              <div className="rdv-modal__field">
-                <label className="rdv-modal__label" htmlFor="rdv-date">
-                  Date
+                <label className="rdv-modal__label" htmlFor="rdv-client-id">
+                  ID Client *
                 </label>
                 <input
-                  id="rdv-date"
-                  name="date"
-                  type="date"
+                  id="rdv-client-id"
+                  name="client_id"
+                  type="number"
+                  min="1"
                   className="rdv-modal__input"
-                  value={formData.date}
+                  value={formData.client_id}
                   onChange={handleFormChange}
                   required
                 />
               </div>
 
-              {/* Type de service */}
+              <div className="rdv-modal__field">
+                <label className="rdv-modal__label" htmlFor="rdv-date">
+                  Date du rendez-vous *
+                </label>
+                <input
+                  id="rdv-date"
+                  name="date_rdv"
+                  type="date"
+                  className="rdv-modal__input"
+                  value={formData.date_rdv}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="rdv-modal__row">
+                <div className="rdv-modal__field">
+                  <label className="rdv-modal__label" htmlFor="rdv-heure-debut">
+                    Heure début
+                  </label>
+                  <input
+                    id="rdv-heure-debut"
+                    name="heure_debut"
+                    type="time"
+                    className="rdv-modal__input"
+                    value={formData.heure_debut}
+                    onChange={handleFormChange}
+                  />
+                </div>
+                <div className="rdv-modal__field">
+                  <label className="rdv-modal__label" htmlFor="rdv-heure-fin">
+                    Heure fin
+                  </label>
+                  <input
+                    id="rdv-heure-fin"
+                    name="heure_fin"
+                    type="time"
+                    className="rdv-modal__input"
+                    value={formData.heure_fin}
+                    onChange={handleFormChange}
+                  />
+                </div>
+              </div>
+
               <div className="rdv-modal__field">
                 <label className="rdv-modal__label" htmlFor="rdv-service">
-                  Service
+                  Service *
                 </label>
                 <select
                   id="rdv-service"
@@ -592,14 +471,11 @@ export default function RendezVousPage() {
                 >
                   <option value="">— Sélectionner un service —</option>
                   {SERVICES_LIST.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
+                    <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Statut — En attente par défaut */}
               <div className="rdv-modal__field">
                 <label className="rdv-modal__label" htmlFor="rdv-statut">
                   Statut
@@ -611,15 +487,13 @@ export default function RendezVousPage() {
                   value={formData.statut}
                   onChange={handleFormChange}
                 >
-                  <option value="En attente">En attente</option>
-                  <option value="Confirmé">Confirmé</option>
-                  <option value="En cours">En cours</option>
-                  <option value="Annulé">Annulé</option>
-                  <option value="Terminé">Terminé</option>
+                  <option value="en_attente">En attente</option>
+                  <option value="confirme">Confirmé</option>
+                  <option value="annule">Annulé</option>
+                  <option value="termine">Terminé</option>
                 </select>
               </div>
 
-              {/* Notes libres */}
               <div className="rdv-modal__field">
                 <label className="rdv-modal__label" htmlFor="rdv-notes">
                   Notes
@@ -634,19 +508,16 @@ export default function RendezVousPage() {
                 />
               </div>
 
-              {/* Pied de modal — annuler / soumettre */}
               <div className="rdv-modal__footer">
-                <button
-                  type="button"
-                  className="rdv-modal__cancel"
-                  onClick={closeModal}
-                >
+                <button type="button" className="rdv-modal__cancel" onClick={closeModal}>
                   Annuler
                 </button>
-                <button type="submit" className="rdv-modal__submit">
-                  {modal.type === 'create'
-                    ? 'Créer le rendez-vous'
-                    : 'Enregistrer les modifications'}
+                <button type="submit" className="rdv-modal__submit" disabled={submitting}>
+                  {submitting
+                    ? 'En cours…'
+                    : modal.type === 'create'
+                      ? 'Créer le rendez-vous'
+                      : 'Enregistrer les modifications'}
                 </button>
               </div>
             </form>

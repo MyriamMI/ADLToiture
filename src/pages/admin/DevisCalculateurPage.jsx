@@ -82,7 +82,7 @@ function StepIndicator({ current }) {
               }
             >
               <div className="calc-step__circle">
-                {done ? '✓' : s.num}
+                {done ? <i className="fas fa-check" /> : s.num}
               </div>
               <span className="calc-step__label">{s.label}</span>
             </div>
@@ -296,7 +296,7 @@ function Step2({ lines, onChange }) {
                       onClick={() => delLine(l.id)}
                       title="Supprimer"
                     >
-                      ×
+                      <i className="fas fa-times"></i>
                     </button>
                   </td>
                 </tr>
@@ -321,7 +321,7 @@ function Step2({ lines, onChange }) {
         </div>
 
         <button className="calc-add-btn" onClick={addLine}>
-          + Ajouter un matériau
+          <i className="fas fa-plus"></i> Ajouter un matériau
         </button>
 
         <div className="calc-subtotal">
@@ -423,7 +423,7 @@ function Step3({ moLines, machLines, onChangeMO, onChangeMach }) {
                         onClick={() => delMO(l.id)}
                         title="Supprimer"
                       >
-                        ×
+                        <i className="fas fa-times"></i>
                       </button>
                     </td>
                   </tr>
@@ -447,7 +447,7 @@ function Step3({ moLines, machLines, onChangeMO, onChangeMach }) {
             </table>
           </div>
           <button className="calc-add-btn" onClick={addMO}>
-            + Ajouter une ligne MO
+            <i className="fas fa-plus"></i> Ajouter une ligne MO
           </button>
           <div className="calc-subtotal">
             <span>Sous-total main d'œuvre</span>
@@ -508,7 +508,7 @@ function Step3({ moLines, machLines, onChangeMO, onChangeMach }) {
                         onClick={() => delMach(l.id)}
                         title="Supprimer"
                       >
-                        ×
+                        <i className="fas fa-times"></i>
                       </button>
                     </td>
                   </tr>
@@ -532,7 +532,7 @@ function Step3({ moLines, machLines, onChangeMO, onChangeMach }) {
             </table>
           </div>
           <button className="calc-add-btn" onClick={addMach}>
-            + Ajouter une machine
+            <i className="fas fa-plus"></i> Ajouter une machine
           </button>
           <div className="calc-subtotal">
             <span>Sous-total machines</span>
@@ -609,7 +609,7 @@ function Step4({ lines, onChange }) {
                       onClick={() => delLine(l.id)}
                       title="Supprimer"
                     >
-                      ×
+                      <i className="fas fa-times"></i>
                     </button>
                   </td>
                 </tr>
@@ -633,7 +633,7 @@ function Step4({ lines, onChange }) {
           </table>
         </div>
         <button className="calc-add-btn" onClick={addLine}>
-          + Ajouter un frais
+          <i className="fas fa-plus"></i> Ajouter un frais
         </button>
         <div className="calc-subtotal">
           <span>Sous-total frais divers</span>
@@ -1177,7 +1177,7 @@ export default function DevisCalculateurPage() {
       <div className="calc-nav">
         {step > 1 && (
           <button className="calc-nav__prev" onClick={goPrev}>
-            ← Précédent
+            <i className="fas fa-arrow-left"></i> Précédent
           </button>
         )}
 
@@ -1189,7 +1189,7 @@ export default function DevisCalculateurPage() {
               disabled={!canGoNext()}
               title={!canGoNext() ? 'Veuillez remplir les champs obligatoires' : undefined}
             >
-              Suivant →
+              Suivant <i className="fas fa-arrow-right"></i>
             </button>
           ) : (
             <>
@@ -1198,10 +1198,10 @@ export default function DevisCalculateurPage() {
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? 'Sauvegarde…' : '💾 Sauvegarder'}
+                {saving ? 'Sauvegarde…' : <><i className="fas fa-save" /> Sauvegarder</>}
               </button>
               <button className="calc-nav__next" onClick={handlePDF}>
-                📄 Générer le devis PDF
+                <i className="fas fa-file-pdf"></i> Générer le devis PDF
               </button>
             </>
           )}

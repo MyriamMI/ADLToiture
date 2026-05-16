@@ -1,6 +1,11 @@
 RewriteEngine On
 
 # Route all requests that are not real files or directories to index.php.
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
+
+# Allow PATCH and DELETE methods
+
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"

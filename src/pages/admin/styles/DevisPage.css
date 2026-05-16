@@ -361,6 +361,7 @@
   white-space: nowrap;
 }
 
+.status-badge--draft      { background-color: #f3f4f6; color: #4b5563; }
 .status-badge--pending    { background-color: #fff3cd; color: #92600a; }
 .status-badge--sent       { background-color: #dbeafe; color: #1e40af; }
 .status-badge--accepted   { background-color: #d1fae5; color: #065f46; }

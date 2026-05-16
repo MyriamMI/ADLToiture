@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import {
+  getAvis, updateAvisStatut, deleteAvis,
+  getFaq, createFaq, updateFaq, deleteFaq,
+} from '../../services/api'
 import './styles/AvisFaqPage.css'
 
-/* ══════════════════════════════
-   Données mock — Avis
-══════════════════════════════ */
-const MOCK_AVIS = [
+const AVIS_LABEL = { en_attente: 'En attente', valide: 'Validé' }
+
+const MOCK_AVIS_REMOVED = [
   {
     id: 1,
     client: 'Martin Dupont',
@@ -61,10 +64,7 @@ const MOCK_AVIS = [
   },
 ]
 
-/* ══════════════════════════════
-   Données mock — FAQ
-══════════════════════════════ */
-const MOCK_FAQ = [
+const MOCK_FAQ_REMOVED = [
   {
     id: 1,
     question: 'Quels types de toitures rénovez-vous ?',
@@ -162,17 +162,8 @@ export default function AvisFaqPage() {
 
   /* ── Chargement initial ── */
   useEffect(() => {
-    /* Avis */
-    fetch('/api/avis.php')
-      .then((r) => r.json())
-      .then((d) => setAvisList(d))
-      .catch(() => setAvisList(MOCK_AVIS))
-
-    /* FAQ */
-    fetch('/api/faq.php')
-      .then((r) => r.json())
-      .then((d) => setFaqList(d))
-      .catch(() => setFaqList(MOCK_FAQ))
+    getAvis().then(setAvisList).catch(() => {})
+    getFaq().then(setFaqList).catch(() => {})
   }, [])
 
   /* ── Scroll lock quand la modal FAQ est ouverte ── */
@@ -186,19 +177,15 @@ export default function AvisFaqPage() {
   ══════════════════════════════ */
   const handleValiderAvis = (id) => {
     setAvisList((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, statut: 'Validé' } : a))
+      prev.map((a) => (a.id === id ? { ...a, statut: 'valide' } : a))
     )
-    fetch('/api/avis.php', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, statut: 'Validé' }),
-    }).catch(() => {})
+    updateAvisStatut(id, 'valide').catch(() => {})
   }
 
   const handleSupprimerAvis = (id) => {
     if (!window.confirm('Supprimer cet avis définitivement ?')) return
     setAvisList((prev) => prev.filter((a) => a.id !== id))
-    fetch(`/api/avis.php?id=${id}`, { method: 'DELETE' }).catch(() => {})
+    deleteAvis(id).catch(() => {})
   }
 
   /* ══════════════════════════════
@@ -216,26 +203,20 @@ export default function AvisFaqPage() {
 
   const closeFaqModal = () => setFaqModal(null)
 
-  const handleFaqSubmit = () => {
+  const handleFaqSubmit = async () => {
     if (!faqForm.question.trim() || !faqForm.reponse.trim()) return
 
     if (faqModal.type === 'create') {
-      const newItem = { id: Date.now(), ...faqForm }
-      setFaqList((prev) => [...prev, newItem])
-      fetch('/api/faq.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(faqForm),
-      }).catch(() => {})
+      try {
+        await createFaq(faqForm)
+        const all = await getFaq()
+        setFaqList(all)
+      } catch {}
     } else {
       setFaqList((prev) =>
         prev.map((f) => (f.id === faqModal.item.id ? { ...f, ...faqForm } : f))
       )
-      fetch('/api/faq.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: faqModal.item.id, ...faqForm }),
-      }).catch(() => {})
+      updateFaq(faqModal.item.id, faqForm).catch(() => {})
     }
     closeFaqModal()
   }
@@ -243,7 +224,7 @@ export default function AvisFaqPage() {
   const handleSupprimerFaq = (id) => {
     if (!window.confirm('Supprimer cette question ?')) return
     setFaqList((prev) => prev.filter((f) => f.id !== id))
-    fetch(`/api/faq.php?id=${id}`, { method: 'DELETE' }).catch(() => {})
+    deleteFaq(id).catch(() => {})
   }
 
   /* ── Filtrage des avis ── */
@@ -252,9 +233,9 @@ export default function AvisFaqPage() {
     : avisList
 
   const AVIS_TABS = [
-    { label: 'Tous', value: null },
-    { label: 'En attente', value: 'En attente' },
-    { label: 'Validés', value: 'Validé' },
+    { label: 'Tous',       value: null },
+    { label: 'En attente', value: 'en_attente' },
+    { label: 'Validés',    value: 'valide' },
   ]
 
   return (
@@ -270,11 +251,11 @@ export default function AvisFaqPage() {
           <div>
             <h1 className="af-section__title">Gestion des avis</h1>
             <p className="af-section__subtitle">
-              {avisList.filter((a) => a.statut === 'En attente').length} avis en attente
+              {avisList.filter((a) => a.statut === 'en_attente').length} avis en attente
               de validation
             </p>
           </div>
-          <button className="af-btn af-btn--primary">+ Demander un avis</button>
+          <button className="af-btn af-btn--primary"><i className="fas fa-plus"></i> Demander un avis</button>
         </div>
 
         {/* Onglets de filtre */}
@@ -286,9 +267,9 @@ export default function AvisFaqPage() {
               onClick={() => setAvisTab(t.value)}
             >
               {t.label}
-              {t.value === 'En attente' && (
+              {t.value === 'en_attente' && (
                 <span className="af-tab__badge">
-                  {avisList.filter((a) => a.statut === 'En attente').length}
+                  {avisList.filter((a) => a.statut === 'en_attente').length}
                 </span>
               )}
             </button>
@@ -318,18 +299,15 @@ export default function AvisFaqPage() {
               ) : (
                 avisFiltered.map((avis) => (
                   <tr key={avis.id}>
-                    {/* Client */}
                     <td>
                       <div className="af-client">
-                        <div className="af-avatar">{getInitials(avis.client)}</div>
-                        <span className="af-client__name">{avis.client}</span>
+                        <div className="af-avatar">{getInitials(avis.nom)}</div>
+                        <span className="af-client__name">{avis.nom}</span>
                       </div>
                     </td>
-
-                    {/* Texte tronqué */}
                     <td>
-                      <span className="af-avis-text" title={avis.texte}>
-                        {truncate(avis.texte)}
+                      <span className="af-avis-text" title={avis.commentaire}>
+                        {truncate(avis.commentaire)}
                       </span>
                     </td>
 
@@ -346,25 +324,25 @@ export default function AvisFaqPage() {
                       <span
                         className={
                           'af-badge' +
-                          (avis.statut === 'Validé'
+                          (avis.statut === 'valide'
                             ? ' af-badge--valid'
                             : ' af-badge--pending')
                         }
                       >
-                        {avis.statut}
+                        {AVIS_LABEL[avis.statut] ?? avis.statut}
                       </span>
                     </td>
 
                     {/* Actions */}
                     <td>
                       <div className="af-actions">
-                        {avis.statut === 'En attente' && (
+                        {avis.statut === 'en_attente' && (
                           <button
                             className="af-action-btn af-action-btn--validate"
                             title="Valider"
                             onClick={() => handleValiderAvis(avis.id)}
                           >
-                            ✓
+                            <i className="fas fa-check"></i>
                           </button>
                         )}
                         <button
@@ -372,7 +350,7 @@ export default function AvisFaqPage() {
                           title="Supprimer"
                           onClick={() => handleSupprimerAvis(avis.id)}
                         >
-                          ×
+                          <i className="fas fa-times"></i>
                         </button>
                       </div>
                     </td>
@@ -399,7 +377,7 @@ export default function AvisFaqPage() {
             </p>
           </div>
           <button className="af-btn af-btn--primary" onClick={openFaqCreate}>
-            + Ajouter
+            <i className="fas fa-plus"></i> Ajouter
           </button>
         </div>
 
@@ -451,14 +429,14 @@ export default function AvisFaqPage() {
                           title="Modifier"
                           onClick={() => openFaqEdit(faq)}
                         >
-                          ✏
+                          <i className="fas fa-pen"></i>
                         </button>
                         <button
                           className="af-action-btn af-action-btn--delete"
                           title="Supprimer"
                           onClick={() => handleSupprimerFaq(faq.id)}
                         >
-                          ×
+                          <i className="fas fa-times"></i>
                         </button>
                       </div>
                     </td>
@@ -488,7 +466,7 @@ export default function AvisFaqPage() {
                 {faqModal.type === 'create' ? 'Nouvelle question FAQ' : 'Modifier la question'}
               </h3>
               <button className="af-modal__close" onClick={closeFaqModal} aria-label="Fermer">
-                ×
+                <i className="fas fa-times"></i>
               </button>
             </div>
 
