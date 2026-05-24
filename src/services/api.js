@@ -65,6 +65,7 @@ export const exportIcal = (id) => `${BASE_URL}/rdv/${id}/ical`;
 
 // ─── Devis ────────────────────────────────────────────────────────────────────
 export const getDevis = () => apiFetch("/devis");
+export const getDevisById = (id) => apiFetch(`/devis/${id}`);
 export const createDevis = (data) =>
   apiFetch("/devis", { method: "POST", body: JSON.stringify(data) });
 export const updateDevis = (id, data) =>
