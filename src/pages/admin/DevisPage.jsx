@@ -254,10 +254,7 @@ export default function DevisPage() {
         <h1 className="dv-page__title">Devis</h1>
 
         <div className="dv-page__actions">
-          <Link to="/admin/devis/calculateur" className="dv-page__calc-btn">
-            Calculateur Devis <i className="fas fa-arrow-right"></i>
-          </Link>
-          <button className="dv-page__new-btn" onClick={openCreateModal}>
+<button className="dv-page__new-btn" onClick={openCreateModal}>
             <i className="fas fa-plus"></i> Nouveau Devis
           </button>
         </div>

@@ -20,7 +20,6 @@ import DashboardPage from './pages/admin/DashboardPage'
 import RendezVousPage from './pages/admin/RendezVousPage'
 import ClientsPage from './pages/admin/ClientsPage'
 import DevisPage from './pages/admin/DevisPage'
-import DevisCalculateurPage from './pages/admin/DevisCalculateurPage'
 import DemandesPage from './pages/admin/DemandesPage'
 import AvisFaqPage from './pages/admin/AvisFaqPage'
 import StatistiquesPage from './pages/admin/StatistiquesPage'
@@ -59,7 +58,6 @@ function App() {
         <Route path="/admin/appointments"      element={<RendezVousPage />} />
         <Route path="/admin/clients"           element={<ClientsPage />} />
         <Route path="/admin/quotes"            element={<DevisPage />} />
-        <Route path="/admin/devis/calculateur" element={<DevisCalculateurPage />} />
         <Route path="/admin/reviews"           element={<AvisFaqPage />} />
         <Route path="/admin/stats"             element={<StatistiquesPage />} />
       </Route>
