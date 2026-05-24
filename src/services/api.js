@@ -32,7 +32,7 @@ export const logout = () => apiFetch("/auth/logout", { method: "POST" });
 export const checkAuth = () => apiFetch("/auth/check");
 
 // ─── Dashboard KPI ────────────────────────────────────────────────────────────
-export const getKpi = () => apiFetch("/kpi"); // à créer côté PHP
+export const getKpi = () => apiFetch("/kpi");
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 export const getClients = () => apiFetch("/clients");
@@ -61,7 +61,7 @@ export const createRdv = (data) =>
 export const updateRdv = (id, data) =>
   apiFetch(`/rdv/${id}`, { method: "PUT", body: JSON.stringify(data) });
 export const deleteRdv = (id) => apiFetch(`/rdv/${id}`, { method: "DELETE" });
-export const exportIcal = (id) => `${BASE_URL}/rdv/${id}/ical`; // utilisé directement comme href de lien
+export const exportIcal = (id) => `${BASE_URL}/rdv/${id}/ical`;
 
 // ─── Devis ────────────────────────────────────────────────────────────────────
 export const getDevis = () => apiFetch("/devis");

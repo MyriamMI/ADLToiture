@@ -1,15 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php *)",
+      "Bash(curl -s \"http://localhost:5174/src/pages/ContactPage.jsx\")",
+      "Bash(npx vite *)",
+      "Bash(pkill -f \"vite --port 5174\")",
       "Bash(npm run *)",
+      "Bash(git stash *)",
+      "Bash(git pull *)",
       "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git push *)",
-      "Bash(sync.bat)",
-      "PowerShell(& \"C:\\\\Users\\\\gmico\\\\Desktop\\\\TFE\\\\ADLToiture\\\\sync.bat\")",
-      "PowerShell(php -l \"C:\\\\Users\\\\gmico\\\\Desktop\\\\TFE\\\\ADLToiture\\\\php\\\\api\\\\index.php\"; php -l \"C:\\\\Users\\\\gmico\\\\Desktop\\\\TFE\\\\ADLToiture\\\\php\\\\api\\\\controllers\\\\KpiController.php\"; php -l \"C:\\\\Users\\\\gmico\\\\Desktop\\\\TFE\\\\ADLToiture\\\\php\\\\api\\\\controllers\\\\DemandesController.php\")",
-      "PowerShell(Start-Process -FilePath \"C:\\\\Users\\\\gmico\\\\Desktop\\\\TFE\\\\ADLToiture\\\\sync.bat\" -Verb RunAs -Wait)"
+      "Bash(git commit *)"
     ]
   }
 }

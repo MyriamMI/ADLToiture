@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/layout/PublicLayout'
 import AdminLayout from './components/layout/AdminLayout'
@@ -26,7 +27,9 @@ import StatistiquesPage from './pages/admin/StatistiquesPage'
 
 function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* ── Routes publiques — avec Header, Navbar et Footer ── */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
@@ -61,6 +64,7 @@ function App() {
         <Route path="/admin/stats"             element={<StatistiquesPage />} />
       </Route>
     </Routes>
+    </>
   )
 }
 

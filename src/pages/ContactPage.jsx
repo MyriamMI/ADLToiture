@@ -57,6 +57,7 @@ const INITIAL_FORM = {
 export default function ContactPage() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [status, setStatus] = useState("idle"); // idle | submitting | success
+  const [rgpd, setRgpd] = useState(false);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -301,22 +302,30 @@ export default function ContactPage() {
 
                 {/* Pied du formulaire */}
                 <div className="contact-form__footer">
+                  <label className="contact-form__rgpd-label">
+                    <input
+                      type="checkbox"
+                      className="contact-form__rgpd-check"
+                      checked={rgpd}
+                      onChange={(e) => setRgpd(e.target.checked)}
+                      required
+                    />
+                    En soumettant ce formulaire, j'accepte que mes données
+                    soient utilisées pour traiter ma demande, conformément à la{" "}
+                    <Link to="/politique-confidentialite">
+                      politique de confidentialité
+                    </Link>
+                    .
+                  </label>
                   <button
                     type="submit"
                     className="contact-form__submit"
-                    disabled={status === "submitting"}
+                    disabled={status === "submitting" || !rgpd}
                   >
                     {status === "submitting"
                       ? "Envoi en cours…"
                       : "Envoyer ma demande"}
                   </button>
-                  <p className="contact-form__legal">
-                    En envoyant ce formulaire, vous acceptez notre{" "}
-                    <Link to="/politique-de-confidentialite">
-                      politique de confidentialité
-                    </Link>
-                    .
-                  </p>
                 </div>
               </form>
             )}

@@ -34,7 +34,6 @@ export function AuthProvider({ children }) {
   )
 }
 
-/* Hook personnalisé pour accéder au contexte */
 export function useAuth() {
   return useContext(AuthContext)
 }
