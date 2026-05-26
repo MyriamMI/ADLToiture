@@ -21,7 +21,7 @@ class ClientsController
     {
         checkAuth();
 
-        $stmt = $this->db->query('SELECT * FROM clients ORDER BY date_creation DESC');
+        $stmt = $this->db->query('SELECT * FROM clients WHERE actif = 1 ORDER BY date_creation DESC');
         echo json_encode($stmt->fetchAll());
     }
 
@@ -30,7 +30,7 @@ class ClientsController
     {
         checkAuth();
 
-        $stmt = $this->db->prepare('SELECT * FROM clients WHERE id = ?');
+        $stmt = $this->db->prepare('SELECT * FROM clients WHERE id = ? AND actif = 1');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
 
@@ -113,12 +113,13 @@ class ClientsController
         echo json_encode(['success' => true]);
     }
 
-    /** DELETE /clients/{id} — remove a client. */
+    /** DELETE /clients/{id} — soft delete (hides client, keeps history). */
     public function delete(int $id): void
     {
         checkAuth();
 
-        $stmt = $this->db->prepare('DELETE FROM clients WHERE id = ?');
+        // Soft delete — keeps data for history, just hides the client
+        $stmt = $this->db->prepare('UPDATE clients SET actif = 0 WHERE id = ? AND actif = 1');
         $stmt->execute([$id]);
 
         if ($stmt->rowCount() === 0) {

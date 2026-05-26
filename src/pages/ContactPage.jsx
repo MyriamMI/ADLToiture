@@ -6,6 +6,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./styles/ContactPage.css";
+import { sendDemande } from '../services/api';
 
 /* -- Correction icône Leaflet par défaut (CDN) -- */
 delete L.Icon.Default.prototype._getIconUrl;
@@ -64,14 +65,25 @@ export default function ContactPage() {
     setForm((f) => ({ ...f, [name]: value }));
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    setStatus("submitting");
-    /* Mock — simule un envoi sans API */
-    setTimeout(() => {
-      setStatus("success");
-      setForm(INITIAL_FORM);
-    }, 800);
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setStatus('submitting')
+    try {
+      await sendDemande({
+        nom:       form.nom,
+        telephone: form.tel,
+        email:     form.email   || null,
+        ville:     form.ville,
+        service:   form.service || null,
+        surface:   form.surface || null,
+        message:   form.message || null,
+      })
+      setStatus('success')
+      setForm(INITIAL_FORM)
+    } catch (err) {
+      setStatus('idle')
+      alert('Erreur lors de l\'envoi. Veuillez réessayer.')
+    }
   }
 
   useEffect(() => {

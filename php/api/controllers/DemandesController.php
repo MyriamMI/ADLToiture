@@ -86,12 +86,16 @@ class DemandesController
         $allowed = ['nouvelle', 'traitee', 'refusee', 'reportee', 'reorientee'];
         if (empty($data['statut']) || !in_array($data['statut'], $allowed, true)) {
             http_response_code(400);
-            echo json_encode(['error' => 'statut must be one of: ' . implode(', ', $allowed)]);
+            echo json_encode(['error' => 'statut invalide']);
             return;
         }
 
-        $stmt = $this->db->prepare('UPDATE demandes SET statut = ? WHERE id = ?');
-        $stmt->execute([$data['statut'], $id]);
+        $clientId = isset($data['client_id']) ? (int) $data['client_id'] : null;
+
+        $stmt = $this->db->prepare(
+            'UPDATE demandes SET statut = ?, client_id = ? WHERE id = ?'
+        );
+        $stmt->execute([$data['statut'], $clientId, $id]);
 
         if ($stmt->rowCount() === 0) {
             http_response_code(404);

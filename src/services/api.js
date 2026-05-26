@@ -46,10 +46,10 @@ export const deleteClient = (id) =>
 
 // ─── Demandes ─────────────────────────────────────────────────────────────────
 export const getDemandes = () => apiFetch("/demandes");
-export const updateDemandeStatut = (id, statut) =>
+export const updateDemandeStatut = (id, statut, client_id = null) =>
   apiFetch(`/demandes/${id}/statut`, {
     method: "PUT",
-    body: JSON.stringify({ statut }),
+    body: JSON.stringify({ statut, ...(client_id && { client_id }) }),
   });
 export const deleteDemande = (id) =>
   apiFetch(`/demandes/${id}`, { method: "DELETE" });

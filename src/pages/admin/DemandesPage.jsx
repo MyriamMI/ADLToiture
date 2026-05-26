@@ -83,7 +83,7 @@ export default function DemandesPage() {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await createClient({
+      const newClient = await createClient({
         nom:       modal.nom,
         telephone: modal.telephone,
         ville:     modal.ville,
@@ -91,15 +91,15 @@ export default function DemandesPage() {
         statut:    'nouveau',
       })
       await createRdv({
-        client:      modal.nom,
-        date:        form.date_rdv,
-        heure_debut: form.heure_debut,
-        heure_fin:   form.heure_fin,
-        service:     modal.service,
-        notes:       form.notes,
+        client_id:    newClient.id,
+        service:      modal.service,
+        date_demande: modal.date_envoi,
+        date_rdv:     form.date_rdv,
+        heure_debut:  form.heure_debut,
+        heure_fin:    form.heure_fin,
+        notes:        form.notes,
       })
-      console.log('[DemandesPage] handleAccepter → updateDemandeStatut', { id: modal.id, typeId: typeof modal.id, statut: 'traitee' })
-      await updateDemandeStatut(modal.id, 'traitee')
+      await updateDemandeStatut(modal.id, 'traitee', newClient.id)
       setDemandes((prev) =>
         prev.map((d) => (d.id === modal.id ? { ...d, statut: 'traitee' } : d))
       )
