@@ -376,12 +376,12 @@
 
 /* ── Icônes d'action partagées (info, édition, visualisation) ── */
 .fa-calendar-alt {
-  color: #7c3aed;
+  color: #550101;
   transition: color 0.15s ease;
 }
 
 .fa-calendar-alt:hover {
-  color: #5b21b6;
+  color: #3a0101;
 }
 
 .fa-trash {

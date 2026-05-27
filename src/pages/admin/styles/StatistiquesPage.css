@@ -180,7 +180,7 @@
 
 .st-hbar__track {
   height: 10px;
-  background-color: #f0ede8;
+  background-color: #F5F5F5;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -233,8 +233,8 @@
   color: rgba(0, 0, 0, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background-color: #fafafa;
-  border-bottom: 1px solid #f0ede8;
+  background-color: #F5F5F5;
+  border-bottom: 1px solid #F5F5F5;
   white-space: nowrap;
 }
 
@@ -244,7 +244,7 @@
 }
 
 .st-top-table tbody tr:hover {
-  background-color: #fdfaf7;
+  background-color: #F5F5F5;
 }
 
 .st-top-table tbody td {
@@ -278,7 +278,7 @@
 }
 
 .st-evol--flat {
-  background-color: #f3f4f6;
+  background-color: #F5F5F5;
   color: rgba(0, 0, 0, 0.4);
   font-weight: 400;
 }

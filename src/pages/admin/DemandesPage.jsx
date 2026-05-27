@@ -86,6 +86,7 @@ export default function DemandesPage() {
       const newClient = await createClient({
         nom:       modal.nom,
         telephone: modal.telephone,
+        email:     modal.email ?? null,
         ville:     modal.ville,
         adresse:   form.adresse,
         statut:    'nouveau',
@@ -390,6 +391,7 @@ export default function DemandesPage() {
                   type="date"
                   className="dm-modal__input"
                   value={form.date_rdv}
+                  min={new Date().toISOString().split('T')[0]}
                   onChange={handleFormChange}
                   required
                 />

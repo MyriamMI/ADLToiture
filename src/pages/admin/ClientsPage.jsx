@@ -16,8 +16,12 @@ const TABS = [
   { label: "Annulé",   filter: "annule" },
 ];
 
-/* Statuts disponibles dans le formulaire */
-const STATUTS = ["nouveau", "en_cours", "termine", "annule"];
+const STATUT_CLIENT_LABEL = {
+  nouveau:  'Nouveau',
+  en_cours: 'En cours',
+  termine:  'Terminé',
+  annule:   'Annulé',
+};
 
 /* Formulaire vide */
 const EMPTY_FORM = {
@@ -624,11 +628,10 @@ export default function ClientsPage() {
                   value={formData.statut}
                   onChange={handleFormChange}
                 >
-                  {STATUTS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
+                  <option value="nouveau">Nouveau</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="termine">Terminé</option>
+                  <option value="annule">Annulé</option>
                 </select>
               </div>
 

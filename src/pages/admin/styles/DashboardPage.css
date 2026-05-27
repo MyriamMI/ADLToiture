@@ -63,7 +63,7 @@
 .kpi-card__value--orange { color: #d97706; }
 .kpi-card__value--green  { color: #059669; }
 .kpi-card__value--blue   { color: #2563eb; }
-.kpi-card__value--gray   { color: #6b7280; }
+.kpi-card__value--gray   { color: rgba(0,0,0,0.5); }
 
 .kpi-card__hint {
   font-size: 0.75rem;
@@ -87,7 +87,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.125rem 1.5rem;
-  border-bottom: 1px solid #f0ede8;
+  border-bottom: 1px solid #F5F5F5;
 }
 
 .dashboard__section-title {
@@ -127,7 +127,7 @@
   color: rgba(0, 0, 0, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background-color: #fafafa;
+  background-color: #F5F5F5;
   white-space: nowrap;
 }
 
@@ -137,7 +137,7 @@
 }
 
 .dashboard__table tbody tr:hover {
-  background-color: #fafaf9;
+  background-color: #F5F5F5;
 }
 
 .dashboard__table tbody td {
@@ -190,7 +190,7 @@
 .status-badge--confirmed { background-color: #d1fae5; color: #065f46; }
 .status-badge--cancelled { background-color: #fee2e2; color: #991b1b; }
 .status-badge--in-progress { background-color: #dbeafe; color: #1e40af; }
-.status-badge--done      { background-color: #e5e7eb; color: #374151; }
+.status-badge--done      { background-color: #e5e7eb; color: rgba(0,0,0,0.5); }
 .status-badge--active    { background-color: #d1fae5; color: #065f46; }
 
 /* ── Boutons d'action ── */
@@ -216,7 +216,7 @@
 }
 
 .action-btn:hover {
-  background-color: #f5f0ec;
+  background-color: #F5F5F5;
   color: #550101;
 }
 

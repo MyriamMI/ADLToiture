@@ -2,7 +2,7 @@
 .login-page {
   --primary: #550101;
   --primary-dark: #3a0101;
-  --cream: #fcf4eb;
+  --cream: #F5F5F5;
 
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -149,7 +149,7 @@
 .login-page__forgot {
   align-self: flex-end;
   font-size: 0.8125rem;
-  color: #2563eb;
+  color: #550101;
   text-decoration: none;
   margin-top: -0.5rem;
 }

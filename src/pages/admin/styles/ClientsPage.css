@@ -135,7 +135,7 @@
 }
 
 .cli-tab:not(.cli-tab--active) .cli-tab__count {
-  background-color: #f0ede8;
+  background-color: #F5F5F5;
   color: rgba(0, 0, 0, 0.5);
 }
 
@@ -167,7 +167,7 @@
   color: rgba(0, 0, 0, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background-color: #fafafa;
+  background-color: #F5F5F5;
   white-space: nowrap;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .cli-table tbody tr:hover {
-  background-color: #fafaf9;
+  background-color: #F5F5F5;
 }
 
 .cli-table tbody td {
@@ -211,7 +211,7 @@
 }
 
 .cli-info-btn:hover {
-  background-color: #f5f0ec;
+  background-color: #F5F5F5;
   color: #550101;
 }
 
@@ -355,7 +355,7 @@
 
 /* En-tête du panneau — avatar + nom + statut */
 .cli-detail__head {
-  background-color: #fafaf8;
+  background-color: #F5F5F5;
   padding: 1.5rem 1.5rem 1.25rem;
   display: flex;
   flex-direction: column;
@@ -363,7 +363,7 @@
   gap: 0.5rem;
   text-align: center;
   position: relative;
-  border-bottom: 1px solid #f0ede8;
+  border-bottom: 1px solid #F5F5F5;
 }
 
 /* Grand avatar initiales dans le détail */
@@ -397,7 +397,7 @@
   width: 28px;
   height: 28px;
   border: none;
-  background-color: #f0ede8;
+  background-color: #F5F5F5;
   color: rgba(0, 0, 0, 0.5);
   border-radius: 6px;
   cursor: pointer;
@@ -411,7 +411,7 @@
 }
 
 .cli-detail__close:hover {
-  background-color: #e0d6c8;
+  background-color: #F5F5F5;
   color: #1a1a1a;
 }
 
@@ -460,7 +460,7 @@
 /* Séparateur */
 .cli-detail__divider {
   border: none;
-  border-top: 1px solid #f0ede8;
+  border-top: 1px solid #F5F5F5;
   margin: 0;
 }
 
@@ -475,7 +475,7 @@
 /* Pied du panneau — actions */
 .cli-detail__footer {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #f0ede8;
+  border-top: 1px solid #F5F5F5;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -650,7 +650,7 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid #f0ede8;
+  border-top: 1px solid #F5F5F5;
   flex-shrink: 0;
 }
 

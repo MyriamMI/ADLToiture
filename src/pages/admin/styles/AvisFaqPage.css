@@ -89,7 +89,7 @@
 .af-tabs {
   display: flex;
   gap: 0.25rem;
-  border-bottom: 1px solid #f0ede8;
+  border-bottom: 1px solid #F5F5F5;
   padding-bottom: 0;
 }
 
@@ -138,7 +138,7 @@
 ══════════════════════════════ */
 .af-table-wrap {
   background-color: #ffffff;
-  border: 1px solid #f0ede8;
+  border: 1px solid #F5F5F5;
   border-radius: 10px;
   overflow: hidden;
   overflow-x: auto;
@@ -159,9 +159,9 @@
   color: rgba(0, 0, 0, 0.4);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background-color: #fafafa;
+  background-color: #F5F5F5;
   white-space: nowrap;
-  border-bottom: 1px solid #f0ede8;
+  border-bottom: 1px solid #F5F5F5;
 }
 
 .af-table tbody tr {
@@ -170,7 +170,7 @@
 }
 
 .af-table tbody tr:hover {
-  background-color: #fdfaf7;
+  background-color: #F5F5F5;
 }
 
 .af-table tbody td {
@@ -286,8 +286,8 @@
 }
 
 .af-cat-badge--devis {
-  background-color: #ede9fe;
-  color: #5b21b6;
+  background-color: rgba(85, 1, 1, 0.08);
+  color: #550101;
 }
 
 .af-cat-badge--zone {
@@ -338,12 +338,12 @@
 }
 
 .af-action-btn--edit {
-  background-color: #ede9fe;
-  color: #5b21b6;
+  background-color: rgba(85, 1, 1, 0.08);
+  color: #550101;
 }
 
 .af-action-btn--edit:hover {
-  background-color: #ddd6fe;
+  background-color: rgba(85, 1, 1, 0.15);
 }
 
 .af-action-btn--delete {
@@ -457,7 +457,7 @@
   justify-content: flex-end;
   gap: 0.625rem;
   padding: 1rem 1.25rem;
-  border-top: 1px solid #f0ede8;
+  border-top: 1px solid #F5F5F5;
   flex-shrink: 0;
 }
 
