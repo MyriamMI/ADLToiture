@@ -44,6 +44,31 @@ class ClientsController
     }
 
     /**
+     * Returns true if an active client with the same telephone or email already exists.
+     * Pass $excludeId to ignore the client being updated.
+     */
+    private function isDuplicate(string $telephone, string $email, ?int $excludeId = null): bool
+    {
+        $sql = "SELECT id FROM clients
+                WHERE actif = 1
+                  AND (
+                        (? != '' AND telephone = ?)
+                     OR (? != '' AND email    = ?)
+                  )";
+        $params = [$telephone, $telephone, $email, $email];
+
+        if ($excludeId !== null) {
+            $sql .= ' AND id != ?';
+            $params[] = $excludeId;
+        }
+
+        $sql .= ' LIMIT 1';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetch() !== false;
+    }
+
+    /**
      * POST /clients  { nom, telephone, ville, email?, adresse?, statut? }
      * Required: nom, telephone, ville.
      */
@@ -57,6 +82,12 @@ class ClientsController
                 echo json_encode(['error' => "Field '{$field}' is required"]);
                 return;
             }
+        }
+
+        if ($this->isDuplicate($data['telephone'] ?? '', $data['email'] ?? '')) {
+            http_response_code(409);
+            echo json_encode(['error' => 'A client with this phone number or email already exists.']);
+            return;
         }
 
         $stmt = $this->db->prepare(
@@ -83,6 +114,12 @@ class ClientsController
     public function update(int $id, array $data): void
     {
         checkAuth();
+
+        if ($this->isDuplicate($data['telephone'] ?? '', $data['email'] ?? '', $id)) {
+            http_response_code(409);
+            echo json_encode(['error' => 'A client with this name and contact already exists.']);
+            return;
+        }
 
         $stmt = $this->db->prepare(
             'UPDATE clients

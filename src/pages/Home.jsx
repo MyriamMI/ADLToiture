@@ -1,7 +1,7 @@
 import Hero from '../components/sections/Hero'
 import Services from '../components/sections/Services'
+import AvisClients from '../components/sections/AvisClients'
 import About from '../components/sections/About'
-import References from '../components/sections/References'
 import Contact from '../components/sections/Contact'
 
 export default function Home() {
@@ -9,8 +9,8 @@ export default function Home() {
     <main>
       <Hero />
       <Services />
+      <AvisClients />
       <About />
-      <References />
       <Contact />
     </main>
   )

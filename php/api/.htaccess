@@ -9,3 +9,9 @@ RewriteRule ^ index.php [QSA,L]
 # Allow PATCH and DELETE methods
 
 Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+
+# Block direct HTTP access to the .env file
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>

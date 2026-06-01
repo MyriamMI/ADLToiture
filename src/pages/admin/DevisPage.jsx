@@ -89,6 +89,61 @@ function calcSousTotal(lignes) {
 }
 
 /* ══════════════════════════════════════════
+   Dropdown action menu — positionnement fixe (getBoundingClientRect)
+══════════════════════════════════════════ */
+function DevisActionMenu({ devis, openMenu, setOpenMenu, onEdit, onDelete, onGeneratePDF, onStatusChange }) {
+  const isOpen = openMenu === devis.id
+  const btnRef = useRef(null)
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (isOpen && btnRef.current) {
+      const rect            = btnRef.current.getBoundingClientRect()
+      const estimatedHeight = 120
+      const top = rect.bottom + 4 + estimatedHeight > window.innerHeight
+        ? rect.top - estimatedHeight - 4
+        : rect.bottom + 4
+      setDropPos({ top, left: rect.right - 160 })
+    }
+  }, [isOpen])
+
+  return (
+    <div className="dv-menu-wrap">
+      <button
+        ref={btnRef}
+        className={"dv-dots-btn" + (isOpen ? " dv-dots-btn--open" : "")}
+        aria-label={`Actions pour ${devis.client_nom}`}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        onClick={(e) => { e.stopPropagation(); setOpenMenu((prev) => prev === devis.id ? null : devis.id); }}
+      >
+        <i className="fas fa-ellipsis-v"></i>
+      </button>
+
+      {isOpen && (
+        <div className="dv-dropdown" role="menu" style={{ position: 'fixed', top: dropPos.top, left: dropPos.left }}>
+          {devis.statut !== "accepte" && (
+            <button className="dv-dropdown__item" role="menuitem" onClick={() => onStatusChange(devis, "accepte")}>
+              <i className="fas fa-check"></i> Accepté
+            </button>
+          )}
+          {devis.statut !== "refuse" && (
+            <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => onStatusChange(devis, "refuse")}>
+              <i className="fas fa-ban"></i> Refusé
+            </button>
+          )}
+          {devis.statut !== "brouillon" && (
+            <button className="dv-dropdown__item" role="menuitem" onClick={() => onStatusChange(devis, "brouillon")}>
+              <i className="fas fa-undo"></i> Brouillon
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ══════════════════════════════════════════
    Composant principal
 ══════════════════════════════════════════ */
 export default function DevisPage() {
@@ -108,6 +163,7 @@ export default function DevisPage() {
   useEffect(() => {
     Promise.all([getDevis(), getClients()])
       .then(([devis, cli]) => {
+        console.log(devis);
         setDevisList(devis);
         setClients(cli);
       })
@@ -222,12 +278,12 @@ export default function DevisPage() {
 
   async function handleCreate(e) {
     e.preventDefault();
+    console.log('[handleCreate] client_id:', formData.client_id, '| lignes:', formData.lignes)
     const payload = {
       client_id: parseInt(formData.client_id, 10),
       service: formData.lignes[0]?.description || "Divers",
       statut:
         formData.client_id &&
-        formData.date_creation &&
         formData.lignes.some(
           (l) => l.description.trim() !== "" && l.prix_unitaire > 0,
         )
@@ -260,9 +316,18 @@ export default function DevisPage() {
 
   async function handleUpdate(e) {
     e.preventDefault();
+    const currentStatut = modal.devis?.statut ?? 'brouillon'
+    const autoStatut = formData.client_id &&
+      formData.lignes.some((l) => l.description.trim() !== "" && l.prix_unitaire > 0)
+        ? "en_attente"
+        : "brouillon"
+    const newStatut = ['brouillon', 'en_attente'].includes(currentStatut)
+      ? autoStatut
+      : currentStatut
     const payload = {
       client_id: parseInt(formData.client_id, 10),
       service: formData.lignes[0]?.description || modal.devis.service,
+      statut: newStatut,
       tva: formData.tva,
       montant_ht: sousTotal,
       montant_tva: tvaAmount,
@@ -300,6 +365,12 @@ export default function DevisPage() {
   function handleGeneratePDF(devis) {
     console.info("Génération PDF pour :", devis.client_nom, devis.id);
     setOpenMenu(null);
+  }
+
+  async function handleStatusChange(devis, statut) {
+    try { await updateDevis(devis.id, { ...devis, statut }) } catch { /* API indisponible */ }
+    setDevisList((prev) => prev.map((d) => d.id === devis.id ? { ...d, statut } : d))
+    setOpenMenu(null)
   }
 
   /* ── Rendu ── */
@@ -404,125 +475,74 @@ export default function DevisPage() {
 
                     <td>
                       <span
-                        className={`status-badge ${statusClass(devis.statut)}`}
+                        className={`status-badge ${statusClass(devis.statut ?? 'brouillon')}`}
                       >
-                        {STATUS_LABEL[devis.statut] ?? devis.statut}
+                        {STATUS_LABEL[devis.statut ?? 'brouillon'] ?? 'Brouillon'}
                       </span>
                     </td>
 
                     <td>
-                      <div className="dv-menu-wrap">
-                        <button
-                          className={
-                            "dv-dots-btn" +
-                            (openMenu === devis.id ? " dv-dots-btn--open" : "")
-                          }
-                          aria-label={`Actions pour ${devis.client_nom}`}
-                          aria-haspopup="true"
-                          aria-expanded={openMenu === devis.id}
-                          onClick={() =>
-                            setOpenMenu((prev) =>
-                              prev === devis.id ? null : devis.id,
-                            )
-                          }
-                        >
-                          <i className="fas fa-ellipsis-v"></i>
-                        </button>
-
-                        {openMenu === devis.id && (
-                          <div className="dv-dropdown" role="menu">
-                            {/* ── brouillon ── */}
-                            {devis.statut === "brouillon" && (
-                              <>
-                                <button className="dv-dropdown__item" role="menuitem" onClick={() => openEditModal(devis)}>
-                                  <i className="fas fa-pen"></i> Modifier
-                                </button>
-                                <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => handleDelete(devis.id)}>
-                                  <i className="fas fa-trash"></i> Supprimer
-                                </button>
-                              </>
-                            )}
-
-                            {/* ── en_attente ── */}
-                            {devis.statut === "en_attente" && (
-                              <>
-                                <button className="dv-dropdown__item" role="menuitem" onClick={() => openEditModal(devis)}>
-                                  <i className="fas fa-pen"></i> Modifier
-                                </button>
-                                <button
-                                  className="dv-dropdown__item"
-                                  role="menuitem"
-                                  onClick={async () => {
-                                    try { await updateDevis(devis.id, { ...devis, statut: "envoye" }) } catch { /* API indisponible */ }
-                                    setDevisList((prev) => prev.map((d) => d.id === devis.id ? { ...d, statut: "envoye" } : d))
-                                    setOpenMenu(null)
-                                  }}
-                                >
-                                  <i className="fas fa-paper-plane"></i> Marquer comme envoyé
-                                </button>
-                                <button className="dv-dropdown__item" role="menuitem" onClick={() => handleGeneratePDF(devis)}>
-                                  <i className="fas fa-file-pdf"></i> Générer PDF
-                                </button>
-                                <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => handleDelete(devis.id)}>
-                                  <i className="fas fa-trash"></i> Supprimer
-                                </button>
-                              </>
-                            )}
-
-                            {/* ── envoye ── */}
-                            {devis.statut === "envoye" && (
-                              <>
-                                <button
-                                  className="dv-dropdown__item"
-                                  role="menuitem"
-                                  onClick={async () => {
-                                    try { await updateDevis(devis.id, { ...devis, statut: "accepte" }) } catch { /* API indisponible */ }
-                                    setDevisList((prev) => prev.map((d) => d.id === devis.id ? { ...d, statut: "accepte" } : d))
-                                    setOpenMenu(null)
-                                  }}
-                                >
-                                  <i className="fas fa-check"></i> Accepté
-                                </button>
-                                <button
-                                  className="dv-dropdown__item"
-                                  role="menuitem"
-                                  onClick={async () => {
-                                    try { await updateDevis(devis.id, { ...devis, statut: "refuse" }) } catch { /* API indisponible */ }
-                                    setDevisList((prev) => prev.map((d) => d.id === devis.id ? { ...d, statut: "refuse" } : d))
-                                    setOpenMenu(null)
-                                  }}
-                                >
-                                  <i className="fas fa-ban"></i> Refusé
-                                </button>
-                                <button className="dv-dropdown__item" role="menuitem" onClick={() => handleGeneratePDF(devis)}>
-                                  <i className="fas fa-file-pdf"></i> Générer PDF
-                                </button>
-                                <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => handleDelete(devis.id)}>
-                                  <i className="fas fa-trash"></i> Supprimer
-                                </button>
-                              </>
-                            )}
-
-                            {/* ── accepte ou refuse ── */}
-                            {(devis.statut === "accepte" || devis.statut === "refuse") && (
-                              <>
-                                <button className="dv-dropdown__item" role="menuitem" onClick={() => handleGeneratePDF(devis)}>
-                                  <i className="fas fa-file-pdf"></i> Générer PDF
-                                </button>
-                                <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => handleDelete(devis.id)}>
-                                  <i className="fas fa-trash"></i> Supprimer
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
+                      <DevisActionMenu
+                        devis={devis}
+                        openMenu={openMenu}
+                        setOpenMenu={setOpenMenu}
+                        onEdit={openEditModal}
+                        onDelete={handleDelete}
+                        onGeneratePDF={handleGeneratePDF}
+                        onStatusChange={handleStatusChange}
+                      />
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* ── Cards mobiles devis ── */}
+        <div className="dv-mobile-cards">
+          {filtered.length === 0 ? (
+            <p className="dv-mobile-empty">Aucun devis trouvé.</p>
+          ) : (
+            filtered.map((devis) => (
+              <div key={devis.id} className="dv-mobile-card">
+                <div className="dv-mobile-card__left">
+                  <div className="dv-mobile-card__header">
+                    <span className="table-avatar" aria-hidden="true">
+                      {getInitials(devis.client_nom)}
+                    </span>
+                    <div className="dv-mobile-card__info">
+                      <span className="dv-mobile-card__name">{devis.client_nom}</span>
+                      <span className="dv-mobile-card__service">{devis.service}</span>
+                    </div>
+                  </div>
+                  <div className="dv-mobile-card__date">
+                    <i className="fas fa-calendar-alt" aria-hidden="true"></i>
+                    {formatDate(devis.date_creation)}
+                  </div>
+                </div>
+                <div className="dv-mobile-card__right">
+                  <span className={`status-badge ${statusClass(devis.statut ?? 'brouillon')}`}>
+                    {STATUS_LABEL[devis.statut ?? 'brouillon'] ?? 'Brouillon'}
+                  </span>
+                  <div className="dv-mobile-card__footer">
+                    <span className="dv-mobile-card__amount">
+                      {formatEUR(devis.montant_ttc)}
+                    </span>
+                    <DevisActionMenu
+                      devis={devis}
+                      openMenu={openMenu}
+                      setOpenMenu={setOpenMenu}
+                      onEdit={openEditModal}
+                      onDelete={handleDelete}
+                      onGeneratePDF={handleGeneratePDF}
+                      onStatusChange={handleStatusChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -668,6 +688,7 @@ export default function DevisPage() {
                                   min="0"
                                   step="1"
                                   value={ligne.quantite}
+                                  onFocus={(e) => e.target.select()}
                                   onChange={(e) =>
                                     handleLigneChange(
                                       ligne.id,
@@ -685,6 +706,7 @@ export default function DevisPage() {
                                   min="0"
                                   step="0.01"
                                   value={ligne.prix_unitaire}
+                                  onFocus={(e) => e.target.select()}
                                   onChange={(e) =>
                                     handleLigneChange(
                                       ligne.id,

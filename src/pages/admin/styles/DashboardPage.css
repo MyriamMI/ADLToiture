@@ -333,9 +333,182 @@
     font-size: 1.75rem;
   }
 
-  /* Masquer les colonnes secondaires sur mobile */
-  .dashboard__table .col-service,
-  .dashboard__table .col-date-rdv {
+}
+
+/* ── Cards mobiles (masquées sur desktop) ── */
+.dashboard__mobile-cards {
+  display: none;
+}
+
+.mobile-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.875rem 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.mobile-card__left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mobile-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.mobile-card__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-card__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-card__sub {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.mobile-card__service {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.55);
+  padding-left: 2.125rem;
+}
+
+.mobile-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Modale détail client (dashboard) ── */
+.dash-client-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 1rem;
+}
+
+.dash-client-modal {
+  background-color: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.dash-client-modal__head {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 1.25rem 1rem;
+  background-color: #550101;
+  position: relative;
+}
+
+.dash-client-modal__avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dash-client-modal__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.25rem;
+}
+
+.dash-client-modal__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.dash-client-modal__close:hover {
+  color: #ffffff;
+}
+
+.dash-client-modal__body {
+  padding: 1rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.dash-client-modal__row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+}
+
+.dash-client-modal__row i {
+  width: 16px;
+  color: #550101;
+  flex-shrink: 0;
+}
+
+/* ── Bascule tableau ↔ cards sur mobile ── */
+@media (max-width: 768px) {
+  .dashboard__table-wrap {
     display: none;
+  }
+
+  .dashboard__mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 12px;
   }
 }

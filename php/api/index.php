@@ -39,8 +39,13 @@
  */
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
+$allowedOrigins = [
+    'http://localhost:5173',
+    'https://adltoiture.alwaysdata.net'
+];
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (str_contains($origin, 'localhost')) {
+if (in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
 }
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
@@ -53,9 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-
-// ── Session ───────────────────────────────────────────────────────────────────
-session_start();
 
 // ── URL parsing ───────────────────────────────────────────────────────────────
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -78,20 +80,18 @@ if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
     $body = json_decode($raw, true) ?? [];
 }
 
-// ── DEBUG temporaire ──────────────────────────────────────────────────────────
-error_log("[ROUTER] uri=$requestUri base=$base path=$path segments=" . implode('|', $segments));
-error_log("[ROUTER] method=$method resource=$resource id=" . var_export($id, true) . " action=$action body=" . json_encode($body));
-
 // ── Controller map ────────────────────────────────────────────────────────────
 $controllerMap = [
     'auth'     => 'AuthController',
     'kpi'      => 'KpiController',
+    'stats'    => 'StatsController',
     'demandes' => 'DemandesController',
     'clients'  => 'ClientsController',
     'rdv'      => 'RdvController',
     'devis'    => 'DevisController',
     'avis'     => 'AvisController',
     'faq'      => 'FaqController',
+    'services' => 'ServicesController',
 ];
 
 if (!array_key_exists($resource, $controllerMap)) {
@@ -118,6 +118,16 @@ try {
             }
             break;
 
+        // --- Stats ----------------------------------------------------------
+        case 'stats':
+            if ($method === 'GET') {
+                $ctrl->get();
+            } else {
+                http_response_code(405);
+                echo json_encode(['error' => 'Method not allowed']);
+            }
+            break;
+
         // --- Auth -----------------------------------------------------------
         // /auth/login and /auth/logout → $segments[1] holds the sub-action,
         // not $action ($segments[2]) which would be empty for these two-segment URLs.
@@ -129,8 +139,6 @@ try {
                 $ctrl->logout();
             } elseif ($method === 'GET' && $authAction === 'check') {
                 $ctrl->check();
-            } elseif ($method === 'GET' && $authAction === 'hash') {
-                $ctrl->generateHash(); // DEBUG — remove before production
             } else {
                 http_response_code(405);
                 echo json_encode(['error' => 'Method or route not allowed']);
@@ -202,8 +210,22 @@ try {
                 $ctrl->create($body);
             } elseif (in_array($method, ['PUT', 'PATCH'], true) && $id !== null && $action === 'statut') {
                 $ctrl->updateStatut($id, $body);
+            } elseif (in_array($method, ['PUT', 'PATCH'], true) && $id !== null && $action === 'restore') {
+                $ctrl->restore($id);
             } elseif ($method === 'DELETE' && $id !== null) {
                 $ctrl->delete($id);
+            } else {
+                http_response_code(405);
+                echo json_encode(['error' => 'Method or route not allowed']);
+            }
+            break;
+
+        // --- Services -------------------------------------------------------
+        case 'services':
+            if ($method === 'GET') {
+                $ctrl->getAll();
+            } elseif ($method === 'POST' && $id === null) {
+                $ctrl->create($body);
             } else {
                 http_response_code(405);
                 echo json_encode(['error' => 'Method or route not allowed']);
@@ -229,8 +251,10 @@ try {
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Database error', 'detail' => $e->getMessage()]);
+    error_log($e->getMessage());
+    echo json_encode(['error' => 'Database error']);
 } catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Server error', 'detail' => $e->getMessage()]);
+    error_log($e->getMessage());
+    echo json_encode(['error' => 'Server error']);
 }

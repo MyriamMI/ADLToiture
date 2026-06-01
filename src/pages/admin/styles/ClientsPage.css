@@ -689,6 +689,30 @@
   background-color: #3a0101;
 }
 
+.cli-modal__input--error {
+  border-color: #dc2626;
+}
+
+.cli-modal__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.cli-modal__error {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin: 0.25rem 0 0;
+}
+
+.cli-modal__server-error {
+  font-size: 0.8125rem;
+  color: #dc2626;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 0.25rem;
+}
+
 /* ── Mobile ── */
 @media (max-width: 640px) {
   .cli-page {

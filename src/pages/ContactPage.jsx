@@ -6,7 +6,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./styles/ContactPage.css";
-import { sendDemande } from '../services/api';
+import { sendDemande, getFaq } from '../services/api';
 
 /* -- Correction icône Leaflet par défaut (CDN) -- */
 delete L.Icon.Default.prototype._getIconUrl;
@@ -24,15 +24,6 @@ const infoCards = [
   { label: "Dispo", value: "08h00 – 18h00", Icon: FaClock },
 ];
 
-const faqs = [
-  { question: "Délai pour un devis ?", answer: "Je réponds sous 24h." },
-  { question: "Urgences ?", answer: "Oui, selon la zone d'intervention." },
-  { question: "Devis gratuit ?", answer: "Oui, sans engagement." },
-  {
-    question: "Zone d'intervention ?",
-    answer: "Principalement le Brabant wallon.",
-  },
-];
 
 const SERVICES = [
   "Pose de toiture neuve",
@@ -59,14 +50,33 @@ export default function ContactPage() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [status, setStatus] = useState("idle"); // idle | submitting | success
   const [rgpd, setRgpd] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [submitError, setSubmitError]   = useState("");
+  const [faqs, setFaqs] = useState([]);
+  const [faqLoading, setFaqLoading] = useState(true);
+  const [openFaqId, setOpenFaqId] = useState(null);
+
+  useEffect(() => {
+    getFaq()
+      .then(setFaqs)
+      .catch(() => setFaqs([]))
+      .finally(() => setFaqLoading(false));
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
+    if (name === "tel" || name === "email") setContactError("");
     setForm((f) => ({ ...f, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (!form.tel.trim() && !form.email.trim()) {
+      setContactError("Veuillez renseigner au moins un téléphone ou un email.");
+      return;
+    }
+    setContactError("");
+    setSubmitError("");
     setStatus('submitting')
     try {
       await sendDemande({
@@ -82,7 +92,7 @@ export default function ContactPage() {
       setForm(INITIAL_FORM)
     } catch (err) {
       setStatus('idle')
-      alert('Erreur lors de l\'envoi. Veuillez réessayer.')
+      setSubmitError(err.message || 'Send error. Please try again.')
     }
   }
 
@@ -98,7 +108,12 @@ export default function ContactPage() {
       .addTo(map)
       .bindPopup("ADL Toiture — Brabant wallon");
 
-    return () => map.remove();
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+
+    return () => {
+      clearTimeout(timer);
+      map.remove();
+    };
   }, []);
 
   return (
@@ -195,22 +210,15 @@ export default function ContactPage() {
                   </div>
                   <div className="contact-form__group">
                     <label className="contact-form__label" htmlFor="cf-tel">
-                      Téléphone{" "}
-                      <span
-                        className="contact-form__required"
-                        aria-hidden="true"
-                      >
-                        *
-                      </span>
+                      Téléphone
                     </label>
                     <input
                       id="cf-tel"
                       name="tel"
                       type="tel"
-                      className="contact-form__input"
+                      className={`contact-form__input${contactError ? " contact-form__input--error" : ""}`}
                       value={form.tel}
                       onChange={handleChange}
-                      required
                       autoComplete="tel"
                       placeholder="0470 00 00 00"
                     />
@@ -251,7 +259,7 @@ export default function ContactPage() {
                       id="cf-email"
                       name="email"
                       type="email"
-                      className="contact-form__input"
+                      className={`contact-form__input${contactError ? " contact-form__input--error" : ""}`}
                       value={form.email}
                       onChange={handleChange}
                       autoComplete="email"
@@ -278,6 +286,12 @@ export default function ContactPage() {
                     </select>
                   </div>
                 </div>
+                <p className="contact-form__contact-note">
+                  Veuillez renseigner au moins un téléphone ou un email.
+                </p>
+                {contactError && (
+                  <p className="contact-form__contact-error">{contactError}</p>
+                )}
 
                 {/* Surface */}
                 <div className="contact-form__group">
@@ -339,11 +353,12 @@ export default function ContactPage() {
                       : "Envoyer ma demande"}
                   </button>
                 </div>
+                {submitError && (
+                  <p className="contact-form__submit-error">{submitError}</p>
+                )}
               </form>
             )}
 
-            <h3 className="contact-page__map-title">Zones d'intervention</h3>
-            <div id="contact-map" className="contact-page__map" />
           </div>
 
           {/* Colonne droite — FAQ accordion */}
@@ -355,16 +370,38 @@ export default function ContactPage() {
             <h2 className="contact-page__col-title">Questions fréquentes</h2>
 
             <div className="contact-page__faq">
-              {faqs.map((faq) => (
-                <details key={faq.question} className="faq-item">
-                  <summary className="faq-item__question">
-                    {faq.question}
-                  </summary>
-                  <p className="faq-item__answer">{faq.answer}</p>
-                </details>
-              ))}
+              {faqLoading ? (
+                <p className="faq-loader">Chargement…</p>
+              ) : faqs.length === 0 ? (
+                <p className="faq-empty">Aucune question disponible pour le moment.</p>
+              ) : (
+                faqs.map((faq) => {
+                  const isOpen = openFaqId === faq.id;
+                  return (
+                    <div key={faq.id} className={`faq-item${isOpen ? ' faq-item--open' : ''}`}>
+                      <button
+                        className="faq-item__question"
+                        onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
+                        aria-expanded={isOpen}
+                      >
+                        {faq.question}
+                      </button>
+                      <div className={`faq__answer${isOpen ? ' faq__answer--open' : ''}`}>
+                        <p>{faq.reponse}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Carte map ── */}
+      <section className="contact-page__map-section">
+        <div className="contact-page__container">
+          <div id="contact-map" className="contact-page__map" />
         </div>
       </section>
     </main>

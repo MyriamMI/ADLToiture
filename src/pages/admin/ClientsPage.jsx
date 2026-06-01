@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import {
   getClients,
   createClient,
@@ -36,12 +37,8 @@ const EMPTY_FORM = {
 /* ── Fonctions utilitaires ── */
 
 function getInitials(nom) {
-  return nom
-    .split(" ")
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
+  if (!nom) return '?'
+  return nom.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
 }
 
 const STATUS_CLASS = {
@@ -79,6 +76,7 @@ function formatDate(iso) {
    Composant principal
 ══════════════════════════════════════════ */
 export default function ClientsPage() {
+  const location = useLocation();
   /* ── État ── */
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,16 +90,31 @@ export default function ClientsPage() {
   /* Modal formulaire : { type: 'create'|'edit'|null, client: null|object } */
   const [modal, setModal] = useState({ type: null, client: null });
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [telError, setTelError]       = useState('');
+  const [emailError, setEmailError]   = useState('');
+  const [serverError, setServerError] = useState('');
+  const [villeError, setVilleError]   = useState('');
 
   /* ── Chargement des données ── */
   useEffect(() => {
     getClients()
       .then(setClients)
       .catch((err) =>
-        setError(err.message || "Impossible de charger les clients."),
+        setError(err.message || "Unable to load clients."),
       )
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const detailId = location.state?.detailId
+    if (detailId && clients.length > 0) {
+      const client = clients.find((c) => c.id === detailId)
+      if (client) {
+        openDetail(client)
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [clients])
 
   /* ── Verrouillage du défilement quand une modal est ouverte ── */
   useEffect(() => {
@@ -114,7 +127,7 @@ export default function ClientsPage() {
 
   /* ── Filtrage combiné : recherche + onglet ── */
   const filtered = clients.filter((c) => {
-    const matchSearch = c.nom.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (c.nom ?? '').toLowerCase().includes(search.toLowerCase());
     const matchTab = activeTab === null || c.statut === activeTab;
     return matchSearch && matchTab;
   });
@@ -170,38 +183,92 @@ export default function ClientsPage() {
     setDetail(null);
   }
 
+  function resetErrors() {
+    setTelError(''); setEmailError(''); setServerError(''); setVilleError('');
+  }
+
   const closeModal = useCallback(() => {
     setModal({ type: null, client: null });
+    resetErrors();
   }, []);
 
   function handleFormChange(e) {
     const { name, value } = e.target;
+    if (name === 'telephone') { setTelError(''); setEmailError(''); }
+    if (name === 'email')     { setEmailError(''); setTelError(''); }
+    if (name === 'nom' || name === 'telephone' || name === 'email') setServerError('');
+    if (name === 'ville') setVilleError('');
     setFormData((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function validateContactForm() {
+    const tel   = formData.telephone?.trim() ?? '';
+    const email = formData.email?.trim()     ?? '';
+    const ville = formData.ville?.trim()     ?? '';
+    let valid   = true;
+
+    // Ville obligatoire
+    if (!ville) {
+      setVilleError('City is required.');
+      valid = false;
+    } else {
+      setVilleError('');
+    }
+
+    // Au moins un contact OU validation de format
+    if (!tel && !email) {
+      setTelError('');
+      setEmailError('Please provide at least a phone number or an email.');
+      valid = false;
+    } else {
+      setTelError(tel && !/^[+\d][\d\s\-().]{5,}$/.test(tel)
+        ? "Phone number is not valid."
+        : '');
+      setEmailError(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ? "Email address is not valid."
+        : '');
+      if (
+        (tel   && !/^[+\d][\d\s\-().]{5,}$/.test(tel)) ||
+        (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      ) valid = false;
+    }
+
+    return valid;
   }
 
   /* Créer un nouveau client */
   async function handleCreate(e) {
     e.preventDefault();
+    if (!validateContactForm()) return;
     try {
-      const created = await createClient(formData);
-      setClients((prev) => [created, ...prev]);
+      await createClient(formData);
+      const all = await getClients();
+      setClients(all);
       closeModal();
     } catch (err) {
-      setError(err.message || "Erreur lors de la création du client.");
+      if (err.message.includes('already exists')) {
+        setServerError(err.message);
+      } else {
+        setError(err.message || "Error creating client.");
+      }
     }
   }
 
   /* Enregistrer les modifications */
   async function handleUpdate(e) {
     e.preventDefault();
+    if (!validateContactForm()) return;
     try {
-      const updated = await updateClient(modal.client.id, formData);
-      setClients((prev) =>
-        prev.map((c) => (c.id === modal.client.id ? updated : c)),
-      );
+      await updateClient(modal.client.id, formData);
+      const all = await getClients();
+      setClients(all);
       closeModal();
     } catch (err) {
-      setError(err.message || "Erreur lors de la mise à jour du client.");
+      if (err.message.includes('already exists')) {
+        setServerError(err.message);
+      } else {
+        setError(err.message || "Error updating client.");
+      }
     }
   }
 
@@ -212,7 +279,7 @@ export default function ClientsPage() {
       setClients((prev) => prev.filter((c) => c.id !== id));
       closeDetail();
     } catch (err) {
-      setError(err.message || "Erreur lors de la suppression du client.");
+      setError(err.message || "Error deleting client.");
     }
   }
 
@@ -577,11 +644,12 @@ export default function ClientsPage() {
                   id="cli-telephone"
                   name="telephone"
                   type="tel"
-                  className="cli-modal__input"
+                  className={`cli-modal__input${telError ? ' cli-modal__input--error' : ''}`}
                   placeholder="+32 4XX XXX XXX"
                   value={formData.telephone}
                   onChange={handleFormChange}
                 />
+                {telError && <p className="cli-modal__error">{telError}</p>}
               </div>
 
               {/* Email */}
@@ -593,11 +661,12 @@ export default function ClientsPage() {
                   id="cli-email"
                   name="email"
                   type="email"
-                  className="cli-modal__input"
+                  className={`cli-modal__input${emailError ? ' cli-modal__input--error' : ''}`}
                   placeholder="adresse@email.com"
                   value={formData.email}
                   onChange={handleFormChange}
                 />
+                {emailError && <p className="cli-modal__error">{emailError}</p>}
               </div>
 
               {/* Localité */}
@@ -609,11 +678,14 @@ export default function ClientsPage() {
                   id="cli-ville"
                   name="ville"
                   type="text"
-                  className="cli-modal__input"
+                  className={`cli-modal__input${villeError ? ' cli-modal__input--error' : ''}`}
                   placeholder="Ville ou commune"
                   value={formData.ville}
                   onChange={handleFormChange}
                 />
+                {villeError && (
+                  <p className="cli-modal__error">{villeError}</p>
+                )}
               </div>
 
               {/* Statut — Nouveau contact par défaut */}
@@ -649,6 +721,10 @@ export default function ClientsPage() {
                   onChange={handleFormChange}
                 />
               </div>
+
+              {serverError && (
+                <p className="cli-modal__server-error">{serverError}</p>
+              )}
 
               {/* Pied — annuler / soumettre */}
               <div className="cli-modal__footer">

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   getDemandes,
+  getClients,
   createClient,
+  getServices,
   createRdv,
   updateDemandeStatut,
   deleteDemande,
@@ -47,11 +49,12 @@ export default function DemandesPage() {
   const [modal, setModal]           = useState(null)
   const [form, setForm]             = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
+  const [modalError, setModalError] = useState('')
 
   useEffect(() => {
     getDemandes()
       .then(setDemandes)
-      .catch((err) => setError(err.message || 'Impossible de charger les demandes.'))
+      .catch((err) => setError(err.message || 'Unable to load requests.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -72,6 +75,7 @@ export default function DemandesPage() {
 
   function closeModal() {
     setModal(null)
+    setModalError('')
   }
 
   function handleFormChange(e) {
@@ -81,32 +85,59 @@ export default function DemandesPage() {
 
   async function handleAccepter(e) {
     e.preventDefault()
+    if (modal.statut === 'traitee') {
+      setModalError('This request has already been processed.')
+      return
+    }
     setSubmitting(true)
     try {
-      const newClient = await createClient({
-        nom:       modal.nom,
-        telephone: modal.telephone,
-        email:     modal.email ?? null,
-        ville:     modal.ville,
-        adresse:   form.adresse,
-        statut:    'nouveau',
-      })
+      // Résout le service_id depuis le nom du service de la demande
+      const allServices = await getServices()
+      const matchedService = allServices.find(
+        (s) => s.nom.trim().toLowerCase() === (modal.service ?? '').trim().toLowerCase()
+      )
+      const serviceId = matchedService?.id ?? null
+
+      // Cherche un client existant avec le même téléphone ou email
+      const allClients = await getClients()
+      const tel   = modal.telephone?.trim() ?? ''
+      const email = modal.email?.trim()     ?? ''
+      const existing = allClients.find((c) =>
+        (tel   && c.telephone?.trim() === tel) ||
+        (email && c.email?.trim()     === email)
+      )
+
+      let clientId
+      if (existing) {
+        clientId = existing.id
+      } else {
+        const created = await createClient({
+          nom:       modal.nom,
+          telephone: modal.telephone,
+          email:     modal.email ?? null,
+          ville:     modal.ville,
+          adresse:   form.adresse,
+          statut:    'nouveau',
+        })
+        clientId = created.id
+      }
+
       await createRdv({
-        client_id:    newClient.id,
-        service:      modal.service,
+        client_id:    clientId,
+        service_id:   serviceId,
         date_demande: modal.date_envoi,
         date_rdv:     form.date_rdv,
         heure_debut:  form.heure_debut,
         heure_fin:    form.heure_fin,
         notes:        form.notes,
       })
-      await updateDemandeStatut(modal.id, 'traitee', newClient.id)
+      await updateDemandeStatut(modal.id, 'traitee', clientId)
       setDemandes((prev) =>
         prev.map((d) => (d.id === modal.id ? { ...d, statut: 'traitee' } : d))
       )
       closeModal()
     } catch (err) {
-      setError(err.message || 'Erreur lors du traitement de la demande.')
+      setError(err.message || 'Error processing the request.')
     } finally {
       setSubmitting(false)
     }
@@ -121,7 +152,7 @@ export default function DemandesPage() {
         prev.map((d) => (d.id === id ? { ...d, statut } : d))
       )
     } catch (err) {
-      setError(err.message || 'Erreur lors de la mise à jour.')
+      setError(err.message || 'Error updating status.')
     }
   }
 
@@ -131,7 +162,7 @@ export default function DemandesPage() {
       await deleteDemande(id)
       setDemandes((prev) => prev.filter((d) => d.id !== id))
     } catch (err) {
-      setError(err.message || 'Erreur lors de la suppression.')
+      setError(err.message || 'Error deleting request.')
     }
   }
 
@@ -244,6 +275,7 @@ export default function DemandesPage() {
               <tr>
                 <th>Nom</th>
                 <th>Téléphone</th>
+                <th>Email</th>
                 <th>Ville</th>
                 <th>Service</th>
                 <th>Date d'envoi</th>
@@ -254,7 +286,7 @@ export default function DemandesPage() {
             <tbody>
               {demandes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="dm-table__empty">
+                  <td colSpan={8} className="dm-table__empty">
                     Aucune demande reçue.
                   </td>
                 </tr>
@@ -262,7 +294,8 @@ export default function DemandesPage() {
                 demandes.map((d) => (
                   <tr key={d.id}>
                     <td className="dm-td-name">{d.nom}</td>
-                    <td>{d.telephone}</td>
+                    <td>{d.telephone || "—"}</td>
+                    <td>{d.email || "—"}</td>
                     <td>{d.ville}</td>
                     <td>{d.service}</td>
                     <td>{formatDate(d.date_envoi)}</td>
@@ -440,6 +473,10 @@ export default function DemandesPage() {
                   onChange={handleFormChange}
                 />
               </div>
+
+              {modalError && (
+                <p className="dm-modal__error">{modalError}</p>
+              )}
 
               <div className="dm-modal__footer">
                 <button type="button" className="dm-modal__cancel" onClick={closeModal}>

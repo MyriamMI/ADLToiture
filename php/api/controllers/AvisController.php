@@ -5,10 +5,12 @@ require_once __DIR__ . '/../middleware/auth.php';
 
 /**
  * Manages customer reviews (avis).
- * - getAll()      public: returns only validated reviews; admin: returns all.
- * - create()      public: inserts a new review in 'en_attente' state.
+ * - getAll()       public: returns only validated, non-deleted reviews.
+ *                  admin:  returns all non-deleted; ?deleted=1 returns soft-deleted.
+ * - create()       public: inserts a new review in 'en_attente' state.
  * - updateStatut() admin: validates or rejects a review.
- * - delete()      admin: removes a review permanently.
+ * - delete()       admin: soft delete (sets deleted_at = NOW()).
+ * - restore()      admin: undoes soft delete (sets deleted_at = NULL).
  */
 class AvisController
 {
@@ -21,18 +23,26 @@ class AvisController
 
     /**
      * GET /avis
-     * Returns all reviews when admin is authenticated, only 'valide' ones otherwise.
+     * ?deleted=1 → admin only, returns soft-deleted reviews.
+     * Default    → admin: all non-deleted; public: only 'valide' non-deleted.
      */
     public function getAll(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+        $deleted = isset($_GET['deleted']) && $_GET['deleted'] === '1';
 
-        if (!empty($_SESSION['admin_id'])) {
-            $stmt = $this->db->query('SELECT * FROM avis ORDER BY date DESC');
+        if ($deleted) {
+            checkAuth();
+            $stmt = $this->db->query(
+                'SELECT * FROM avis WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC'
+            );
+        } elseif (tryAuth() !== null) {
+            $stmt = $this->db->query(
+                'SELECT * FROM avis WHERE deleted_at IS NULL ORDER BY date DESC'
+            );
         } else {
-            $stmt = $this->db->query("SELECT * FROM avis WHERE statut = 'valide' ORDER BY date DESC");
+            $stmt = $this->db->query(
+                "SELECT * FROM avis WHERE statut = 'valide' AND deleted_at IS NULL ORDER BY date DESC"
+            );
         }
 
         echo json_encode($stmt->fetchAll());
@@ -89,7 +99,7 @@ class AvisController
             return;
         }
 
-        $stmt = $this->db->prepare('UPDATE avis SET statut = ? WHERE id = ?');
+        $stmt = $this->db->prepare('UPDATE avis SET statut = ? WHERE id = ? AND deleted_at IS NULL');
         $stmt->execute([$data['statut'], $id]);
 
         if ($stmt->rowCount() === 0) {
@@ -101,17 +111,38 @@ class AvisController
         echo json_encode(['success' => true]);
     }
 
-    /** DELETE /avis/{id} — permanently remove a review. */
+    /** DELETE /avis/{id} — soft delete (sets deleted_at). */
     public function delete(int $id): void
     {
         checkAuth();
 
-        $stmt = $this->db->prepare('DELETE FROM avis WHERE id = ?');
+        $stmt = $this->db->prepare(
+            'UPDATE avis SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL'
+        );
         $stmt->execute([$id]);
 
         if ($stmt->rowCount() === 0) {
             http_response_code(404);
             echo json_encode(['error' => 'Avis not found']);
+            return;
+        }
+
+        echo json_encode(['success' => true]);
+    }
+
+    /** PUT /avis/{id}/restore — undo soft delete (clears deleted_at). */
+    public function restore(int $id): void
+    {
+        checkAuth();
+
+        $stmt = $this->db->prepare(
+            "UPDATE avis SET deleted_at = NULL, statut = 'en_attente' WHERE id = ? AND deleted_at IS NOT NULL"
+        );
+        $stmt->execute([$id]);
+
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Avis not found or not deleted']);
             return;
         }
 

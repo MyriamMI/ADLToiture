@@ -113,7 +113,7 @@
   .hero__container {
     grid-template-columns: 1fr;
     padding: var(--space-12) var(--space-6);
-    gap: var(--space-10);
+    gap: var(--space-8);
   }
 
   .hero__title {

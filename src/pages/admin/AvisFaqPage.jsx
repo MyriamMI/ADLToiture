@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  getAvis, updateAvisStatut, deleteAvis,
+  getAvis, updateAvisStatut, deleteAvis, getDeletedAvis, restoreAvis,
   getFaq, createFaq, updateFaq, deleteFaq,
 } from '../../services/api'
 import './styles/AvisFaqPage.css'
@@ -153,6 +153,7 @@ function formatDate(iso) {
 export default function AvisFaqPage() {
   /* ── État — Avis ── */
   const [avisList, setAvisList] = useState([])
+  const [deletedAvisList, setDeletedAvisList] = useState([])
   const [avisTab, setAvisTab] = useState(null) /* null = Tous */
 
   /* ── État — FAQ ── */
@@ -165,6 +166,13 @@ export default function AvisFaqPage() {
     getAvis().then(setAvisList).catch(() => {})
     getFaq().then(setFaqList).catch(() => {})
   }, [])
+
+  /* ── Chargement des avis supprimés quand l'onglet est actif ── */
+  useEffect(() => {
+    if (avisTab === 'deleted') {
+      getDeletedAvis().then(setDeletedAvisList).catch(() => {})
+    }
+  }, [avisTab])
 
   /* ── Scroll lock quand la modal FAQ est ouverte ── */
   useEffect(() => {
@@ -182,10 +190,21 @@ export default function AvisFaqPage() {
     updateAvisStatut(id, 'valide').catch(() => {})
   }
 
-  const handleSupprimerAvis = (id) => {
-    if (!window.confirm('Supprimer cet avis définitivement ?')) return
-    setAvisList((prev) => prev.filter((a) => a.id !== id))
-    deleteAvis(id).catch(() => {})
+  const handleSupprimerAvis = async (id) => {
+    if (!window.confirm('Supprimer cet avis ?')) return
+    await deleteAvis(id)
+    const updated = await getAvis()
+    setAvisList(updated)
+  }
+
+  const handleRestoreAvis = async (id) => {
+    await restoreAvis(id)
+    const [allAvis, deletedAvis] = await Promise.all([
+      getAvis(),
+      getDeletedAvis()
+    ])
+    setAvisList(allAvis)
+    setDeletedAvisList(deletedAvis)
   }
 
   /* ══════════════════════════════
@@ -228,14 +247,17 @@ export default function AvisFaqPage() {
   }
 
   /* ── Filtrage des avis ── */
-  const avisFiltered = avisTab
-    ? avisList.filter((a) => a.statut === avisTab)
-    : avisList
+  const avisFiltered = avisTab === 'deleted'
+    ? deletedAvisList
+    : avisTab
+      ? avisList.filter((a) => a.statut === avisTab)
+      : avisList
 
   const AVIS_TABS = [
     { label: 'Tous',       value: null },
     { label: 'En attente', value: 'en_attente' },
     { label: 'Validés',    value: 'valide' },
+    { label: 'Supprimés',  value: 'deleted' },
   ]
 
   return (
@@ -255,7 +277,6 @@ export default function AvisFaqPage() {
               de validation
             </p>
           </div>
-          <button className="af-btn af-btn--primary"><i className="fas fa-plus"></i> Demander un avis</button>
         </div>
 
         {/* Onglets de filtre */}
@@ -321,21 +342,101 @@ export default function AvisFaqPage() {
 
                     {/* Statut */}
                     <td>
-                      <span
-                        className={
-                          'af-badge' +
-                          (avis.statut === 'valide'
-                            ? ' af-badge--valid'
-                            : ' af-badge--pending')
-                        }
-                      >
-                        {AVIS_LABEL[avis.statut] ?? avis.statut}
-                      </span>
+                      {avisTab === 'deleted' ? (
+                        <span className="af-badge af-badge--deleted">Supprimé</span>
+                      ) : (
+                        <span
+                          className={
+                            'af-badge' +
+                            (avis.statut === 'valide'
+                              ? ' af-badge--valid'
+                              : ' af-badge--pending')
+                          }
+                        >
+                          {AVIS_LABEL[avis.statut] ?? avis.statut}
+                        </span>
+                      )}
                     </td>
 
                     {/* Actions */}
                     <td>
                       <div className="af-actions">
+                        {avisTab === 'deleted' ? (
+                          <button
+                            className="af-action-btn af-action-btn--validate"
+                            title="Restaurer"
+                            onClick={() => handleRestoreAvis(avis.id)}
+                          >
+                            <i className="fas fa-undo"></i>
+                          </button>
+                        ) : (
+                          <>
+                            {avis.statut === 'en_attente' && (
+                              <button
+                                className="af-action-btn af-action-btn--validate"
+                                title="Valider"
+                                onClick={() => handleValiderAvis(avis.id)}
+                              >
+                                <i className="fas fa-check"></i>
+                              </button>
+                            )}
+                            <button
+                              className="af-action-btn af-action-btn--delete"
+                              title="Supprimer"
+                              onClick={() => handleSupprimerAvis(avis.id)}
+                            >
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ── Cards mobiles avis ── */}
+        <div className="af-avis-mobile-cards">
+          {avisFiltered.length === 0 ? (
+            <p className="af-mobile-empty">Aucun avis dans cette catégorie.</p>
+          ) : (
+            avisFiltered.map((avis) => (
+              <div key={avis.id} className="af-avis-card">
+                <div className="af-avis-card__header">
+                  <div className="af-avis-card__left">
+                    <div className="af-avatar">{getInitials(avis.nom)}</div>
+                    <span className="af-avis-card__name">{avis.nom}</span>
+                  </div>
+                  {avisTab === 'deleted' ? (
+                    <span className="af-badge af-badge--deleted">Supprimé</span>
+                  ) : (
+                    <span className={'af-badge' + (avis.statut === 'valide' ? ' af-badge--valid' : ' af-badge--pending')}>
+                      {AVIS_LABEL[avis.statut] ?? avis.statut}
+                    </span>
+                  )}
+                </div>
+
+                <p className="af-avis-card__text">{truncate(avis.commentaire, 100)}</p>
+
+                <div className="af-avis-card__footer">
+                  <div className="af-avis-card__meta">
+                    <Stars note={avis.note} />
+                    <span className="af-avis-card__date">{formatDate(avis.date)}</span>
+                  </div>
+                  <div className="af-actions">
+                    {avisTab === 'deleted' ? (
+                      <button
+                        className="af-action-btn af-action-btn--validate"
+                        title="Restaurer"
+                        onClick={() => handleRestoreAvis(avis.id)}
+                      >
+                        <i className="fas fa-undo"></i>
+                      </button>
+                    ) : (
+                      <>
                         {avis.statut === 'en_attente' && (
                           <button
                             className="af-action-btn af-action-btn--validate"
@@ -352,13 +453,13 @@ export default function AvisFaqPage() {
                         >
                           <i className="fas fa-times"></i>
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 

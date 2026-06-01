@@ -267,6 +267,11 @@
   color: #92400e;
 }
 
+.af-badge--deleted {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
 /* ══════════════════════════════
    Badges catégorie FAQ
 ══════════════════════════════ */
@@ -502,6 +507,91 @@
 }
 
 /* ── Mobile ── */
+/* ── Cards mobiles avis (masquées sur desktop) ── */
+.af-avis-mobile-cards {
+  display: none;
+}
+
+.af-avis-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.875rem 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.af-avis-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.af-avis-card__left {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.af-avis-card__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.af-avis-card__text {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.af-avis-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.af-avis-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.af-avis-card__date {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.af-mobile-empty {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.4);
+  text-align: center;
+  padding: 1rem 0;
+}
+
+/* ── Bascule tableau ↔ cards avis sur mobile ── */
+@media (max-width: 768px) {
+  .af-section:first-child .af-table-wrap {
+    display: none;
+  }
+
+  .af-avis-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 12px 0;
+  }
+}
+
 @media (max-width: 640px) {
   .af-page {
     padding: 1.25rem 1rem;

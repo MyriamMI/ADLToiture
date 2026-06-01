@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { getKpi } from '../../services/api'
+import { getKpi, getToken, BASE_URL } from '../../services/api'
 import './styles/DashboardPage.css'
 
 const STATUS_LABEL = {
@@ -50,19 +50,34 @@ function todayLabel() {
 export default function DashboardPage() {
   const { logout } = useAuth()
   const navigate = useNavigate()
-  const [data, setData]     = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]   = useState(null)
+  const [data, setData]           = useState(null)
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState(null)
+  const [detailClient, setDetailClient] = useState(null)
 
   function handleLogout() {
     logout()
     navigate('/', { replace: true })
   }
 
+  async function handleDashboardIcal(row) {
+    const token = getToken()
+    const response = await fetch(`${BASE_URL}/rdv/${row.id}/ical`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const blob = await response.blob()
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `rdv-${(row.client_nom || 'client').replace(/\s+/g, '-')}.ics`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   useEffect(() => {
     getKpi()
       .then(setData)
-      .catch((err) => setError(err.message || 'Impossible de charger le tableau de bord.'))
+      .catch((err) => setError(err.message || 'Unable to load dashboard.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -183,37 +198,53 @@ export default function DashboardPage() {
                       {STATUS_LABEL[row.statut] ?? row.statut}
                     </span>
                   </td>
-
-                  {/* Boutons d'action — modifier, calendrier, supprimer */}
                   <td>
                     <div className="action-btns">
-                      <button
-                        className="action-btn"
-                        title="Modifier"
-                        aria-label={`Modifier le RDV de ${row.client}`}
-                      >
-                        <i className="fas fa-pen"></i>
-                      </button>
-                      <button
-                        className="action-btn"
-                        title="Replanifier"
-                        aria-label={`Replanifier le RDV de ${row.client}`}
-                      >
-                        <i className="fas fa-calendar-alt"></i>
-                      </button>
-                      <button
-                        className="action-btn action-btn--delete"
-                        title="Supprimer"
-                        aria-label={`Supprimer le RDV de ${row.client}`}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
+                      {row.statut === 'confirme' && (
+                        <button className="action-btn" title="Export iCal" aria-label={`Exporter le RDV de ${row.client_nom}`} onClick={() => handleDashboardIcal(row)}>
+                          <i className="fas fa-calendar-alt"></i>
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* ── Cards mobiles RDV ── */}
+        <div className="dashboard__mobile-cards">
+          {rdv.map((row) => (
+            <div key={row.id} className="mobile-card">
+              <div className="mobile-card__left">
+                <div className="mobile-card__header">
+                  <span className="table-avatar" aria-hidden="true">
+                    {getInitials(row.client_nom)}
+                  </span>
+                  <div className="mobile-card__info">
+                    <span className="mobile-card__name">{row.client_nom}</span>
+                    <span className="mobile-card__sub">{formatDate(row.date_rdv)}</span>
+                  </div>
+                </div>
+                {row.service && (
+                  <div className="mobile-card__service">{row.service}</div>
+                )}
+              </div>
+              <div className="mobile-card__right">
+                <span className={`status-badge ${statusClass(row.statut)}`}>
+                  {STATUS_LABEL[row.statut] ?? row.statut}
+                </span>
+                <div className="mobile-card__actions">
+                  {row.statut === 'confirme' && (
+                    <button className="action-btn" title="Export iCal" aria-label={`Exporter le RDV de ${row.client_nom}`} onClick={() => handleDashboardIcal(row)}>
+                      <i className="fas fa-calendar-alt"></i>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -255,15 +286,9 @@ export default function DashboardPage() {
                       {STATUS_LABEL[row.statut] ?? row.statut}
                     </span>
                   </td>
-
-                  {/* Bouton d'information */}
                   <td>
                     <div className="action-btns">
-                      <button
-                        className="action-btn"
-                        title="Voir le profil"
-                        aria-label={`Voir le profil de ${row.client}`}
-                      >
+                      <button className="action-btn" title="Voir le profil" aria-label={`Voir le profil de ${row.nom}`} onClick={() => setDetailClient(row)}>
                         <i className="fas fa-info-circle"></i>
                       </button>
                     </div>
@@ -273,7 +298,80 @@ export default function DashboardPage() {
             </tbody>
           </table>
         </div>
+
+        {/* ── Cards mobiles Clients ── */}
+        <div className="dashboard__mobile-cards">
+          {clients.map((row) => (
+            <div key={row.id} className="mobile-card">
+              <div className="mobile-card__left">
+                <div className="mobile-card__header">
+                  <span className="table-avatar" aria-hidden="true">
+                    {getInitials(row.nom)}
+                  </span>
+                  <div className="mobile-card__info">
+                    <span className="mobile-card__name">{row.nom}</span>
+                    <span className="mobile-card__sub">{formatDate(row.date_creation)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mobile-card__right">
+                <span className={`status-badge ${statusClass(row.statut)}`}>
+                  {STATUS_LABEL[row.statut] ?? row.statut}
+                </span>
+                <div className="mobile-card__actions">
+                  <button className="action-btn" title="Voir le profil" aria-label={`Voir le profil de ${row.nom}`} onClick={() => setDetailClient(row)}>
+                    <i className="fas fa-info-circle"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* ── Modale détail client ── */}
+      {detailClient && (
+        <div className="dash-client-overlay" onClick={() => setDetailClient(null)}>
+          <div className="dash-client-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="dash-client-modal__head">
+              <div className="dash-client-modal__avatar">{getInitials(detailClient.nom)}</div>
+              <div>
+                <p className="dash-client-modal__name">{detailClient.nom}</p>
+                <span className={`status-badge ${statusClass(detailClient.statut)}`}>
+                  {STATUS_LABEL[detailClient.statut] ?? detailClient.statut}
+                </span>
+              </div>
+              <button className="dash-client-modal__close" onClick={() => setDetailClient(null)} aria-label="Fermer">
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="dash-client-modal__body">
+              {detailClient.telephone && (
+                <div className="dash-client-modal__row">
+                  <i className="fas fa-phone"></i>
+                  <span>{detailClient.telephone}</span>
+                </div>
+              )}
+              {detailClient.email && (
+                <div className="dash-client-modal__row">
+                  <i className="fas fa-envelope"></i>
+                  <span>{detailClient.email}</span>
+                </div>
+              )}
+              {detailClient.ville && (
+                <div className="dash-client-modal__row">
+                  <i className="fas fa-map-marker-alt"></i>
+                  <span>{detailClient.ville}</span>
+                </div>
+              )}
+              <div className="dash-client-modal__row">
+                <i className="fas fa-calendar-alt"></i>
+                <span>Ajouté le {formatDate(detailClient.date_creation)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

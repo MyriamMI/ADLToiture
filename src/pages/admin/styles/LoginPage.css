@@ -194,26 +194,61 @@
   margin-top: 0.5rem;
 }
 
-/* ── Mobile — colonne unique ── */
+/* ── Mobile — plein écran bordeaux + brand + formulaire centré ── */
 @media (max-width: 768px) {
   .login-page {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     background-color: var(--primary);
+    padding: 3rem 1.5rem 5rem;
+    gap: 2rem;
   }
 
-  /* Masquer la colonne gauche sur mobile */
   .login-page__brand {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background-color: transparent;
+    padding: 0;
+    width: 100%;
+  }
+
+  .login-page__brand-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .login-page__brand-tagline {
+    max-width: 280px;
+    text-align: center;
+    margin-top: 0.5rem;
   }
 
   .login-page__form-wrapper {
+    width: 100%;
     background-color: transparent;
-    align-items: flex-start;
-    padding: 2rem 1.5rem;
-    padding-top: 3rem;
+    padding: 0;
+    align-items: center;
   }
 
   .login-page__card {
     max-width: 100%;
+  }
+
+  /* Le lien retour sort du flux et se fixe en bas */
+  .login-page__back {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
   }
 }

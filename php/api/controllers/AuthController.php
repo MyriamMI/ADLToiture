@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../middleware/auth.php';
 
 /**
  * Handles admin authentication (login / logout).
@@ -17,7 +18,7 @@ class AuthController
 
     /**
      * POST /auth/login  { email, password }
-     * Sets $_SESSION['admin_id'] on success.
+     * Returns a signed JWT (HS256) valid for 8 hours.
      */
     public function login(array $data): void
     {
@@ -37,57 +38,44 @@ class AuthController
             return;
         }
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $secret = $_ENV['JWT_SECRET'] ?? null;
+        if (empty($secret)) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Server misconfiguration']);
+            exit;
         }
+        $header  = jwt_base64url_encode(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
+        $payload = jwt_base64url_encode(json_encode([
+            'admin_id' => $admin['id'],
+            'email'    => $admin['email'],
+            'exp'      => time() + 8 * 3600,
+        ]));
+        $signature = jwt_base64url_encode(hash_hmac('sha256', "$header.$payload", $secret, true));
 
-        session_regenerate_id(true); // prevent session fixation
-        $_SESSION['admin_id']    = $admin['id'];
-        $_SESSION['admin_email'] = $admin['email'];
-
-        echo json_encode(['success' => true, 'email' => $admin['email']]);
-    }
-
-    /**
-     * GET /auth/hash — DEBUG ONLY, remove before production.
-     * Returns the bcrypt hash for "admin123" to seed the admin table.
-     */
-    public function generateHash(): void
-    {
-        echo json_encode(['hash' => password_hash('admin123', PASSWORD_DEFAULT)]);
+        echo json_encode([
+            'success' => true,
+            'token'   => "$header.$payload.$signature",
+            'email'   => $admin['email'],
+        ]);
     }
 
     /**
      * GET /auth/check
-     * Returns {"authenticated": true} if a session is active, 401 otherwise.
+     * Returns {"authenticated": true} if the JWT is valid, 401 otherwise.
      */
     public function check(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if (!empty($_SESSION['admin_id'])) {
-            echo json_encode(['authenticated' => true]);
-        } else {
-            http_response_code(401);
-            echo json_encode(['authenticated' => false]);
-        }
+        checkAuth();
+        echo json_encode(['authenticated' => true]);
     }
 
     /**
      * POST /auth/logout
-     * Destroys the current session.
+     * Token-based auth — no server-side state to destroy.
+     * The client removes the token from localStorage.
      */
     public function logout(): void
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        $_SESSION = [];
-        session_destroy();
-
         echo json_encode(['success' => true, 'message' => 'Logged out']);
     }
 }

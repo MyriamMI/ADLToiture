@@ -2,38 +2,37 @@
 
 class Database
 {
-    // Unique instance de la classe (pattern Singleton)
+    // Singleton instance
     private static ?Database $instance = null;
-    
-    // Connexion PDO
+
+    // PDO connection
     private PDO $pdo;
 
-    // Paramètres de connexion — chargés depuis le fichier .env
+    // Connection parameters — loaded from the .env file
     private string $host;
     private string $dbname;
     private string $user;
     private string $password;
 
-    // Constructeur privé — empêche d'instancier la classe avec "new Database()"
+    // Private constructor — prevents direct instantiation with "new Database()"
     private function __construct()
     {
-        // Charge les variables du fichier .env
-        $this->loadEnv(__DIR__ . '/../.env');
+        // Load variables from the .env file
+        $this->loadEnv(__DIR__ . '/../../.env');
 
-        // Récupère les variables d'environnement
-        // Le ?? définit une valeur par défaut si la variable est absente
+        // Read environment variables; ?? sets a fallback if the key is absent
         $this->host     = $_ENV['DB_HOST']     ?? 'localhost';
         $this->dbname   = $_ENV['DB_NAME']      ?? 'adltoiture_db';
         $this->user     = $_ENV['DB_USER']      ?? 'adltoiture';
         $this->password = $_ENV['DB_PASSWORD']  ?? '';
 
-        // Chaîne de connexion PDO avec encodage UTF-8
+        // PDO DSN with UTF-8 encoding
         $dsn = "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4";
 
-        // Crée la connexion PDO avec 3 options importantes :
-        // - ERRMODE_EXCEPTION : lance une exception si une requête échoue
-        // - FETCH_ASSOC : retourne les résultats en tableau associatif (clé => valeur)
-        // - EMULATE_PREPARES false : utilise les vraies requêtes préparées (plus sécurisé)
+        // PDO options:
+        // - ERRMODE_EXCEPTION : throws an exception on query failure
+        // - FETCH_ASSOC       : returns rows as associative arrays
+        // - EMULATE_PREPARES  : false — use real prepared statements (safer)
         $this->pdo = new PDO($dsn, $this->user, $this->password, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -41,22 +40,21 @@ class Database
         ]);
     }
 
-    // Lit le fichier .env ligne par ligne et charge chaque variable dans $_ENV
-    // Ignore les lignes vides et les commentaires (qui commencent par #)
+    // Reads the .env file line by line and loads each variable into $_ENV.
+    // Skips empty lines and lines starting with #.
     private function loadEnv(string $path): void
     {
         if (!is_file($path)) return;
         foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
             $line = trim($line);
             if ($line === '' || str_starts_with($line, '#')) continue;
-            // Sépare la clé et la valeur sur le signe "="
+            // Split key and value on the first "=" sign
             [$key, $value] = explode('=', $line, 2) + [1 => ''];
             $_ENV[trim($key)] = trim($value);
         }
     }
 
-    // Point d'entrée unique — retourne toujours la même instance
-    // Si elle n'existe pas encore, elle est créée ici
+    // Returns the single instance, creating it on first call.
     public static function getInstance(): Database
     {
         if (self::$instance === null) {
@@ -65,15 +63,15 @@ class Database
         return self::$instance;
     }
 
-    // Retourne la connexion PDO pour l'utiliser dans les contrôleurs
+    // Returns the PDO connection for use in controllers.
     public function getConnection(): PDO
     {
         return $this->pdo;
     }
 
-    // Empêche le clonage de l'instance (garantit l'unicité du Singleton)
+    // Prevents cloning — enforces singleton uniqueness.
     private function __clone() {}
-    
-    // Empêche la désérialisation de l'instance
+
+    // Prevents unserialization — enforces singleton uniqueness.
     public function __wakeup(): void {}
 }

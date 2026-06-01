@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from "../../context/AuthContext";
 import './styles/AdminLayout.css'
@@ -26,7 +26,31 @@ const BOTTOM_NAV_ITEMS = [
 export default function AdminLayout() {
   const { logout } = useAuth()
   const navigate = useNavigate()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const STORAGE_KEY = 'adl_sidebar_collapsed'
+
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved !== null) return saved === 'true'
+    return window.innerWidth <= 900
+  })
+
+  useEffect(() => {
+    function handleResize() {
+      if (localStorage.getItem(STORAGE_KEY) === null) {
+        setIsCollapsed(window.innerWidth <= 900)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  function handleToggle() {
+    setIsCollapsed((prev) => {
+      const next = !prev
+      localStorage.setItem(STORAGE_KEY, String(next))
+      return next
+    })
+  }
 
   function handleLogout() {
     logout()
@@ -51,7 +75,7 @@ export default function AdminLayout() {
           </Link>
           <button
             className="admin-sidebar__toggle"
-            onClick={() => setIsCollapsed(c => !c)}
+            onClick={handleToggle}
             aria-label={isCollapsed ? 'Ouvrir le menu' : 'Réduire le menu'}
           >
             {isCollapsed ? '›' : '‹'}

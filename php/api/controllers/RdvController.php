@@ -7,6 +7,7 @@ require_once __DIR__ . '/../middleware/auth.php';
  * CRUD for the rdv table + iCal export.
  * All endpoints require admin authentication.
  * ical_uid is auto-generated on create and never updated.
+ * rdv.service_id is a FK to the services table.
  */
 class RdvController
 {
@@ -17,29 +18,31 @@ class RdvController
         $this->db = Database::getInstance()->getConnection();
     }
 
-    /** GET /rdv — list all appointments with client name, most recent first. */
+    /** GET /rdv — list all appointments with client name and service name, most recent first. */
     public function getAll(): void
     {
         checkAuth();
 
         $stmt = $this->db->query(
-            'SELECT r.*, c.nom AS client_nom
+            'SELECT r.*, c.nom AS client_nom, c.ville AS client_ville, s.nom AS service
              FROM rdv r
              JOIN clients c ON c.id = r.client_id
+             JOIN services s ON s.id = r.service_id
              ORDER BY r.date_rdv DESC, r.id DESC'
         );
         echo json_encode($stmt->fetchAll());
     }
 
-    /** GET /rdv/{id} — fetch a single appointment with client info. */
+    /** GET /rdv/{id} — fetch a single appointment with client and service info. */
     public function getById(int $id): void
     {
         checkAuth();
 
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone
+            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone, s.nom AS service
              FROM rdv r
              JOIN clients c ON c.id = r.client_id
+             JOIN services s ON s.id = r.service_id
              WHERE r.id = ?'
         );
         $stmt->execute([$id]);
@@ -55,14 +58,14 @@ class RdvController
     }
 
     /**
-     * POST /rdv  { client_id, service, date_demande, date_rdv?, heure_debut?, heure_fin?, statut?, notes? }
+     * POST /rdv  { client_id, service_id, date_demande, date_rdv?, heure_debut?, heure_fin?, statut?, notes? }
      * Generates a unique ical_uid automatically.
      */
     public function create(array $data): void
     {
         checkAuth();
 
-        foreach (['client_id', 'service', 'date_demande'] as $field) {
+        foreach (['client_id', 'service_id', 'date_demande'] as $field) {
             if (empty($data[$field])) {
                 http_response_code(400);
                 echo json_encode(['error' => "Field '{$field}' is required"]);
@@ -74,12 +77,12 @@ class RdvController
 
         $stmt = $this->db->prepare(
             'INSERT INTO rdv
-             (client_id, service, date_demande, date_rdv, heure_debut, heure_fin, statut, notes, ical_uid)
+             (client_id, service_id, date_demande, date_rdv, heure_debut, heure_fin, statut, notes, ical_uid)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             (int)  $data['client_id'],
-            $data['service'],
+            (int)  $data['service_id'],
             $data['date_demande'],
             $data['date_rdv']    ?? null,
             $data['heure_debut'] ?? null,
@@ -103,13 +106,13 @@ class RdvController
 
         $stmt = $this->db->prepare(
             'UPDATE rdv
-             SET client_id = ?, service = ?, date_rdv = ?, heure_debut = ?,
+             SET client_id = ?, service_id = ?, date_rdv = ?, heure_debut = ?,
                  heure_fin = ?, date_confirmation = ?, statut = ?, notes = ?
              WHERE id = ?'
         );
         $stmt->execute([
             (int)  ($data['client_id']         ?? 0),
-            $data['service']                   ?? '',
+            (int)  ($data['service_id']         ?? 0),
             $data['date_rdv']                  ?? null,
             $data['heure_debut']               ?? null,
             $data['heure_fin']                 ?? null,
@@ -151,7 +154,6 @@ class RdvController
 
     /**
      * GET /rdv/{id}/ical — download a .ics file for the appointment.
-     * Overrides the JSON Content-Type header set in index.php.
      * date_rdv must be set; falls back to 08:00–09:00 when times are missing.
      */
     public function exportIcal(int $id): void
@@ -159,9 +161,10 @@ class RdvController
         checkAuth();
 
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone
+            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone, s.nom AS service
              FROM rdv r
              JOIN clients c ON c.id = r.client_id
+             JOIN services s ON s.id = r.service_id
              WHERE r.id = ?'
         );
         $stmt->execute([$id]);
@@ -201,4 +204,3 @@ class RdvController
         echo $ics;
     }
 }
-

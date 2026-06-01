@@ -45,16 +45,22 @@ class DemandesController
 
     /**
      * POST /demandes — public endpoint, called by the contact form.
-     * Required fields: nom, telephone, ville.
+     * Required fields: nom, ville, and telephone OR email.
      */
     public function create(array $data): void
     {
-        foreach (['nom', 'telephone', 'ville'] as $field) {
+        foreach (['nom', 'ville'] as $field) {
             if (empty($data[$field])) {
                 http_response_code(400);
                 echo json_encode(['error' => "Field '{$field}' is required"]);
                 return;
             }
+        }
+
+        if (empty($data['telephone']) && empty($data['email'])) {
+            http_response_code(400);
+            echo json_encode(['error' => "Field 'telephone' or 'email' is required"]);
+            return;
         }
 
         $stmt = $this->db->prepare(
@@ -86,8 +92,24 @@ class DemandesController
         $allowed = ['nouvelle', 'traitee', 'refusee', 'reportee', 'reorientee'];
         if (empty($data['statut']) || !in_array($data['statut'], $allowed, true)) {
             http_response_code(400);
-            echo json_encode(['error' => 'statut invalide']);
+            echo json_encode(['error' => 'invalid status']);
             return;
+        }
+
+        if ($data['statut'] === 'traitee') {
+            $check = $this->db->prepare("SELECT statut FROM demandes WHERE id = ?");
+            $check->execute([$id]);
+            $row = $check->fetch();
+            if (!$row) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Demande not found']);
+                return;
+            }
+            if ($row['statut'] === 'traitee') {
+                http_response_code(409);
+                echo json_encode(['error' => 'This request has already been processed.']);
+                return;
+            }
         }
 
         $clientId = isset($data['client_id']) ? (int) $data['client_id'] : null;

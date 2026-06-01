@@ -103,8 +103,26 @@ CREATE TABLE avis (
     note TINYINT NOT NULL,
     commentaire TEXT NOT NULL,
     date DATE NOT NULL,
-    statut ENUM('en_attente','valide') DEFAULT 'en_attente'
+    statut ENUM('en_attente','valide') DEFAULT 'en_attente',
+    deleted_at DATETIME NULL DEFAULT NULL
 );
+
+-- Table services
+CREATE TABLE services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL,
+    UNIQUE KEY nom_unique (nom)
+);
+
+INSERT INTO services (nom) VALUES
+    ('Rénovation toiture'),
+    ('Pose neuve'),
+    ('Zinguerie'),
+    ('Isolation combles'),
+    ('Nettoyage toiture'),
+    ('Réparation urgence'),
+    ('Inspection toiture'),
+    ('Traitement hydrofuge');
 
 -- Table faq
 CREATE TABLE faq (

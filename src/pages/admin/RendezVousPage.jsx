@@ -1,11 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { getRdv, createRdv, updateRdv, deleteRdv, exportIcal } from '../../services/api'
+import { useLocation } from 'react-router-dom'
+import { getRdv, createRdv, updateRdv, deleteRdv, getClients, createClient, getServices, createService, getToken, BASE_URL } from '../../services/api'
 import './styles/RendezVousPage.css'
 
 function ActionMenu({ row, openMenu, setOpenMenu, onEdit, onDelete }) {
   const isOpen = openMenu === row.id
   const btnRef = useRef(null)
   const [dropPos, setDropPos] = useState({ top: 0, left: 0 })
+
+  async function handleExportIcal() {
+    const token = getToken()
+    const response = await fetch(`${BASE_URL}/rdv/${row.id}/ical`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `rdv-${row.client_nom.replace(/\s+/g, '-')}-${row.service.replace(/\s+/g, '-')}-${row.client_ville.replace(/\s+/g, '-')}.ics`
+    a.click()
+    URL.revokeObjectURL(url)
+    setOpenMenu(null)
+    console.log(row);
+  }
 
   useEffect(() => {
     if (isOpen && btnRef.current) {
@@ -32,14 +49,13 @@ function ActionMenu({ row, openMenu, setOpenMenu, onEdit, onDelete }) {
             <i className="fas fa-pen"></i> Modifier
           </button>
           {row.statut === 'confirme' && (
-            <a
+            <button
               className="rdv-dropdown__item rdv-dropdown__item--ical"
-              href={exportIcal(row.id)}
-              download
-              onClick={() => setOpenMenu(null)}
+              role="menuitem"
+              onClick={handleExportIcal}
             >
               <i className="fas fa-calendar-download"></i> Export iCal
-            </a>
+            </button>
           )}
           <button
             className="rdv-dropdown__item rdv-dropdown__item--danger"
@@ -75,7 +91,7 @@ const TABS = [
 
 const EMPTY_FORM = {
   client_id:   '',
-  service:     '',
+  service_id:  '',
   date_rdv:    '',
   heure_debut: '',
   heure_fin:   '',
@@ -106,6 +122,7 @@ function formatDate(iso) {
 }
 
 export default function RendezVousPage() {
+  const location = useLocation()
   const [rdvList, setRdvList]       = useState([])
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState(null)
@@ -113,18 +130,49 @@ export default function RendezVousPage() {
   const [openMenu, setOpenMenu]     = useState(null)
   const [modal, setModal]           = useState({ type: null, item: null })
   const [formData, setFormData]     = useState(EMPTY_FORM)
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting]         = useState(false)
+  const [clients, setClients]               = useState([])
+  const [showNewClient, setShowNewClient]   = useState(false)
+  const [newClientForm, setNewClientForm]   = useState({ nom: '', telephone: '', email: '', ville: '' })
+  const [newClientError, setNewClientError] = useState('')
+  const [creatingClient, setCreatingClient] = useState(false)
+  const [services, setServices]             = useState([])
+  const [showNewService, setShowNewService] = useState(false)
+  const [newServiceNom, setNewServiceNom]   = useState('')
+  const [creatingService, setCreatingService] = useState(false)
 
   useEffect(() => {
     getRdv()
       .then(setRdvList)
-      .catch((err) => setError(err.message || 'Impossible de charger les rendez-vous.'))
+      .catch((err) => setError(err.message || 'Unable to load appointments.'))
       .finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
     document.body.style.overflow = modal.type ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
+  }, [modal.type])
+
+  useEffect(() => {
+    const editId = location.state?.editId
+    if (editId && rdvList.length > 0) {
+      const item = rdvList.find((r) => r.id === editId)
+      if (item) {
+        openEditModal(item)
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [rdvList])
+
+  useEffect(() => {
+    if (modal.type !== null) {
+      getClients().then(setClients).catch(() => {})
+      getServices().then(setServices).catch(() => {})
+      setShowNewClient(false)
+      setNewClientForm({ nom: '', telephone: '', email: '', ville: '' })
+      setShowNewService(false)
+      setNewServiceNom('')
+    }
   }, [modal.type])
 
   const visibleRdv = activeTab
@@ -143,7 +191,7 @@ export default function RendezVousPage() {
   function openEditModal(item) {
     setFormData({
       client_id:   item.client_id,
-      service:     item.service      ?? '',
+      service_id:  item.service_id   ?? '',
       date_rdv:    item.date_rdv     ?? '',
       heure_debut: item.heure_debut  ?? '',
       heure_fin:   item.heure_fin    ?? '',
@@ -175,7 +223,7 @@ export default function RendezVousPage() {
       setRdvList(all)
       closeModal()
     } catch (err) {
-      setError(err.message || 'Erreur lors de la création.')
+      setError(err.message || 'Error creating appointment.')
     } finally {
       setSubmitting(false)
     }
@@ -186,14 +234,57 @@ export default function RendezVousPage() {
     setSubmitting(true)
     try {
       await updateRdv(modal.item.id, formData)
-      setRdvList((prev) =>
-        prev.map((r) => (r.id === modal.item.id ? { ...r, ...formData } : r))
-      )
+      const all = await getRdv()
+      setRdvList(all)
       closeModal()
     } catch (err) {
-      setError(err.message || 'Erreur lors de la mise à jour.')
+      setError(err.message || 'Error updating appointment.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleNewServiceSubmit() {
+    if (!newServiceNom.trim()) return
+    setCreatingService(true)
+    try {
+      const nom = newServiceNom.trim()
+      const result = await createService({ nom })
+      const updated = await getServices()
+      const withNew = updated.some((s) => s.nom === nom)
+        ? updated
+        : [...updated, { id: result.id, nom }].sort((a, b) => a.nom.localeCompare(b.nom))
+      setServices(withNew)
+      setFormData((prev) => ({ ...prev, service_id: result.id }))
+      setShowNewService(false)
+      setNewServiceNom('')
+    } catch {
+      // silencieux
+    } finally {
+      setCreatingService(false)
+    }
+  }
+
+  async function handleNewClientSubmit(e) {
+    e.preventDefault()
+
+    if (!newClientForm.telephone.trim() && !newClientForm.email.trim()) {
+      setNewClientError('Please provide at least a phone number or an email.')
+      return
+    }
+    setNewClientError('')
+    setCreatingClient(true)
+    try {
+      const result = await createClient(newClientForm)
+      const updated = await getClients()
+      setClients(updated)
+      setFormData((prev) => ({ ...prev, client_id: result.id }))
+      setShowNewClient(false)
+      setNewClientForm({ nom: '', telephone: '', email: '', ville: '' })
+    } catch {
+      // silencieux
+    } finally {
+      setCreatingClient(false)
     }
   }
 
@@ -203,8 +294,51 @@ export default function RendezVousPage() {
       await deleteRdv(id)
       setRdvList((prev) => prev.filter((r) => r.id !== id))
     } catch (err) {
-      setError(err.message || 'Erreur lors de la suppression.')
+      setError(err.message || 'Error deleting appointment.')
     }
+  }
+
+  async function handleExportAllIcal() {
+    const token = getToken()
+
+    const allRdv = await fetch(`${BASE_URL}/rdv`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((r) => r.json())
+
+    const confirmed = allRdv.filter((r) => r.statut === 'confirme')
+
+    if (confirmed.length === 0) {
+      alert('Aucun rendez-vous confirmé à exporter.')
+      return
+    }
+
+    const icalTexts = await Promise.all(
+      confirmed.map((rdv) =>
+        fetch(`${BASE_URL}/rdv/${rdv.id}/ical`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then((r) => r.text())
+      )
+    )
+
+    const vevents = icalTexts
+      .map((text) => text.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/)?.[0])
+      .filter(Boolean)
+
+    const combined =
+      'BEGIN:VCALENDAR\r\n' +
+      'VERSION:2.0\r\n' +
+      'PRODID:-//ADL Toiture//FR\r\n' +
+      'CALSCALE:GREGORIAN\r\n' +
+      vevents.join('\r\n') + '\r\n' +
+      'END:VCALENDAR\r\n'
+
+    const blob = new Blob([combined], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'rdv-confirmes.ics'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   if (loading) {
@@ -229,9 +363,14 @@ export default function RendezVousPage() {
       {/* ── En-tête ── */}
       <div className="rdv-page__header">
         <h1 className="rdv-page__title">Rendez-vous</h1>
-        <button className="rdv-page__new-btn" onClick={openCreateModal}>
-          <i className="fas fa-plus"></i> Nouveau rendez-vous
-        </button>
+        <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
+          <button className="rdv-page__new-btn rdv-page__new-btn--secondary" onClick={handleExportAllIcal}>
+            <i className="fas fa-calendar-download"></i> Exporter RDV confirmés
+          </button>
+          <button className="rdv-page__new-btn" onClick={openCreateModal}>
+            <i className="fas fa-plus"></i> Nouveau rendez-vous
+          </button>
+        </div>
       </div>
 
       {/* ── Onglets de filtre ── */}
@@ -399,18 +538,81 @@ export default function RendezVousPage() {
             >
               <div className="rdv-modal__field">
                 <label className="rdv-modal__label" htmlFor="rdv-client-id">
-                  ID Client *
+                  Client *
                 </label>
-                <input
+                <select
                   id="rdv-client-id"
                   name="client_id"
-                  type="number"
-                  min="1"
                   className="rdv-modal__input"
                   value={formData.client_id}
                   onChange={handleFormChange}
                   required
-                />
+                >
+                  <option value="">— Sélectionner un client —</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nom} — {c.ville}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="button"
+                  className="rdv-new-client-toggle"
+                  onClick={() => setShowNewClient((v) => !v)}
+                >
+                  {showNewClient ? '✕ Annuler' : '+ Nouveau client'}
+                </button>
+
+                <div
+                  className={`rdv-new-client-form${showNewClient ? ' rdv-new-client-form--open' : ''}`}
+                >
+                  <input
+                    type="text"
+                    className="rdv-modal__input"
+                    placeholder="Nom *"
+                    value={newClientForm.nom}
+                    onChange={(e) => setNewClientForm((f) => ({ ...f, nom: e.target.value }))}
+                    required={showNewClient}
+                    tabIndex={showNewClient ? 0 : -1}
+                  />
+                  <input
+                    type="tel"
+                    className={`rdv-modal__input${newClientError ? ' rdv-modal__input--error' : ''}`}
+                    placeholder="Téléphone"
+                    value={newClientForm.telephone}
+                    onChange={(e) => { setNewClientError(''); setNewClientForm((f) => ({ ...f, telephone: e.target.value })) }}
+                    tabIndex={showNewClient ? 0 : -1}
+                  />
+                  <input
+                    type="email"
+                    className={`rdv-modal__input${newClientError ? ' rdv-modal__input--error' : ''}`}
+                    placeholder="Email (si pas de téléphone)"
+                    value={newClientForm.email}
+                    onChange={(e) => { setNewClientError(''); setNewClientForm((f) => ({ ...f, email: e.target.value })) }}
+                    tabIndex={showNewClient ? 0 : -1}
+                  />
+                  {newClientError && (
+                    <p className="rdv-new-client-error">{newClientError}</p>
+                  )}
+                  <input
+                    type="text"
+                    className="rdv-modal__input"
+                    placeholder="Ville"
+                    value={newClientForm.ville}
+                    onChange={(e) => setNewClientForm((f) => ({ ...f, ville: e.target.value }))}
+                    tabIndex={showNewClient ? 0 : -1}
+                  />
+                  <button
+                    type="button"
+                    className="rdv-new-client-submit"
+                    disabled={creatingClient}
+                    tabIndex={showNewClient ? 0 : -1}
+                    onClick={handleNewClientSubmit}
+                  >
+                    {creatingClient ? 'Création…' : 'Créer et sélectionner'}
+                  </button>
+                </div>
               </div>
 
               <div className="rdv-modal__field">
@@ -424,6 +626,7 @@ export default function RendezVousPage() {
                   className="rdv-modal__input"
                   value={formData.date_rdv}
                   onChange={handleFormChange}
+                  min={new Date().toISOString().split('T')[0]}
                   required
                 />
               </div>
@@ -463,17 +666,47 @@ export default function RendezVousPage() {
                 </label>
                 <select
                   id="rdv-service"
-                  name="service"
+                  name="service_id"
                   className="rdv-modal__select"
-                  value={formData.service}
+                  value={formData.service_id}
                   onChange={handleFormChange}
                   required
                 >
                   <option value="">— Sélectionner un service —</option>
-                  {SERVICES_LIST.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>{s.nom}</option>
                   ))}
                 </select>
+
+                <button
+                  type="button"
+                  className="rdv-new-client-toggle"
+                  onClick={() => setShowNewService((v) => !v)}
+                >
+                  {showNewService ? '✕ Annuler' : '+ Nouveau service'}
+                </button>
+
+                <div
+                  className={`rdv-new-service-form${showNewService ? ' rdv-new-service-form--open' : ''}`}
+                >
+                  <input
+                    type="text"
+                    className="rdv-modal__input"
+                    placeholder="Nom du service *"
+                    value={newServiceNom}
+                    onChange={(e) => setNewServiceNom(e.target.value)}
+                    tabIndex={showNewService ? 0 : -1}
+                  />
+                  <button
+                    type="button"
+                    className="rdv-new-client-submit"
+                    disabled={creatingService}
+                    tabIndex={showNewService ? 0 : -1}
+                    onClick={handleNewServiceSubmit}
+                  >
+                    {creatingService ? 'Création…' : 'Créer et sélectionner'}
+                  </button>
+                </div>
               </div>
 
               <div className="rdv-modal__field">
