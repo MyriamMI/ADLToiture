@@ -30,7 +30,7 @@ class KpiController
         ];
 
         $stmtRdv = $this->db->query(
-            'SELECT r.id, r.date_rdv, r.heure_debut, s.nom AS service, r.statut, c.nom AS client_nom
+            'SELECT r.id, r.date_rdv, r.heure_debut, s.nom AS service, r.statut, c.nom AS client_nom, c.ville AS client_ville
              FROM rdv r
              JOIN clients c ON c.id = r.client_id
              JOIN services s ON s.id = r.service_id

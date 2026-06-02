@@ -161,7 +161,7 @@ class RdvController
         checkAuth();
 
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone, s.nom AS service
+            'SELECT r.*, c.nom AS client_nom, c.telephone AS client_telephone, c.ville, s.nom AS service
              FROM rdv r
              JOIN clients c ON c.id = r.client_id
              JOIN services s ON s.id = r.service_id
@@ -178,9 +178,10 @@ class RdvController
 
         $start   = $rdv['date_rdv'] . ' ' . ($rdv['heure_debut'] ?? '08:00:00');
         $end     = $rdv['date_rdv'] . ' ' . ($rdv['heure_fin']   ?? '09:00:00');
-        $dtStart = gmdate('Ymd\THis\Z', strtotime($start));
-        $dtEnd   = gmdate('Ymd\THis\Z', strtotime($end));
-        $dtStamp = gmdate('Ymd\THis\Z');
+        $tz      = new \DateTimeZone('Europe/Brussels');
+        $dtStart = (new \DateTime($start, $tz))->format('Ymd\THis');
+        $dtEnd   = (new \DateTime($end,   $tz))->format('Ymd\THis');
+        $dtStamp = (new \DateTime('now',  $tz))->format('Ymd\THis');
 
         $summary     = "RDV – {$rdv['service']} ({$rdv['client_nom']})";
         $description = "Client : {$rdv['client_nom']} / Tél : {$rdv['client_telephone']}";
@@ -192,10 +193,11 @@ class RdvController
         $ics .= "BEGIN:VEVENT\r\n";
         $ics .= "UID:{$rdv['ical_uid']}\r\n";
         $ics .= "DTSTAMP:{$dtStamp}\r\n";
-        $ics .= "DTSTART:{$dtStart}\r\n";
-        $ics .= "DTEND:{$dtEnd}\r\n";
+        $ics .= "DTSTART;TZID=Europe/Brussels:{$dtStart}\r\n";
+        $ics .= "DTEND;TZID=Europe/Brussels:{$dtEnd}\r\n";
         $ics .= "SUMMARY:{$summary}\r\n";
         $ics .= "DESCRIPTION:{$description}\r\n";
+        $ics .= "LOCATION:{$rdv['ville']}\r\n";
         $ics .= "END:VEVENT\r\n";
         $ics .= "END:VCALENDAR\r\n";
 

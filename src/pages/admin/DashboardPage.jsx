@@ -176,6 +176,7 @@ export default function DashboardPage() {
                 <th>Client</th>
                 <th className="col-date-rdv">Date</th>
                 <th className="col-service">Service</th>
+                <th>Ville</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -193,6 +194,7 @@ export default function DashboardPage() {
                   </td>
                   <td className="col-date-rdv">{formatDate(row.date_rdv)}</td>
                   <td className="col-service">{row.service}</td>
+                  <td>{row.client_ville || '—'}</td>
                   <td>
                     <span className={`status-badge ${statusClass(row.statut)}`}>
                       {STATUS_LABEL[row.statut] ?? row.statut}

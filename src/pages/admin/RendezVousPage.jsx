@@ -395,6 +395,7 @@ export default function RendezVousPage() {
                 <th>Date</th>
                 <th>Horaire</th>
                 <th>Service</th>
+                <th>Ville</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -424,6 +425,7 @@ export default function RendezVousPage() {
                         : '—'}
                     </td>
                     <td>{row.service}</td>
+                    <td>{row.client_ville || '—'}</td>
                     <td>
                       <span className={`status-badge ${statusClass(row.statut)}`}>
                         {STATUS_LABEL[row.statut] ?? row.statut}
