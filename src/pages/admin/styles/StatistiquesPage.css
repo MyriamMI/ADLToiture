@@ -3,7 +3,7 @@
 ══════════════════════════════ */
 .st-page {
   padding: 2rem;
-  max-width: 1000px;
+  max-width: var(--container-max);
   margin: 0 auto;
   display: flex;
   flex-direction: column;

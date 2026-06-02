@@ -3,7 +3,7 @@
 ══════════════════════════════ */
 .rdv-page {
   padding: 2rem;
-  max-width: 1100px;
+  max-width: var(--container-max);
   margin: 0 auto;
 }
 

@@ -274,6 +274,7 @@ export default function ClientsPage() {
 
   /* Supprimer un client */
   async function handleDelete(id) {
+    if (!window.confirm("Supprimer ce contact ? Ses données personnelles seront anonymisées (RGPD) mais l'historique des RDV et devis sera conservé.")) return;
     try {
       await deleteClient(id);
       setClients((prev) => prev.filter((c) => c.id !== id));
@@ -568,7 +569,7 @@ export default function ClientsPage() {
                 className="cli-detail__delete-btn"
                 onClick={() => handleDelete(detail.id)}
               >
-                Supprimer le contact
+                Anonymiser le contact (RGPD)
               </button>
               {/* Ouverture du formulaire de modification */}
               <button

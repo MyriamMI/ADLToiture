@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
+import { jsPDF } from "jspdf";
 import {
   getDevis,
   getDevisById,
@@ -421,8 +422,150 @@ export default function DevisPage() {
     setOpenMenu(null);
   }
 
-  function handleGeneratePDF(devis) {
+  async function handleGeneratePDF(devis) {
     setOpenMenu(null);
+
+    // Fetch full devis with lignes (list view doesn't include them)
+    let full = devis;
+    try {
+      full = await getDevisById(devis.id);
+    } catch {
+      // fall back to list-view data if fetch fails
+    }
+
+    const doc       = new jsPDF();
+    const pw        = doc.internal.pageSize.getWidth();
+    const ph        = doc.internal.pageSize.getHeight();
+    const M         = 20;   // margin
+    const cw        = pw - M * 2; // content width
+    const PRIMARY   = [85, 1, 1];
+    const BLACK     = [26, 26, 26];
+    const GRAY      = [120, 120, 120];
+
+    let y = 22;
+
+    // ── Header ──────────────────────────────────────────
+    doc.setFontSize(26);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...PRIMARY);
+    doc.text("DEVIS", M, y);
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY);
+    doc.text("ADL Toiture", M, y + 8);
+
+    // Date — top right
+    const rawDate = full.date_creation ?? devis.date_creation;
+    const dateStr = rawDate
+      ? new Date(rawDate.replace(" ", "T")).toLocaleDateString("fr-BE", {
+          day: "2-digit", month: "2-digit", year: "numeric",
+        })
+      : "—";
+    doc.setFontSize(10);
+    doc.setTextColor(...GRAY);
+    doc.text(`Date : ${dateStr}`, pw - M, y, { align: "right" });
+
+    // Separator
+    y += 14;
+    doc.setDrawColor(...PRIMARY);
+    doc.setLineWidth(0.5);
+    doc.line(M, y, pw - M, y);
+    y += 9;
+
+    // Client / Service
+    doc.setFontSize(10);
+    doc.setTextColor(...BLACK);
+    doc.setFont("helvetica", "bold");
+    doc.text("Client :", M, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(full.client_nom || "—", M + 22, y);
+
+    y += 7;
+    doc.setFont("helvetica", "bold");
+    doc.text("Service :", M, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(full.service || "—", M + 22, y);
+
+    y += 12;
+
+    // ── Lines table ─────────────────────────────────────
+    const lignes = full.lignes;
+    if (lignes && lignes.length > 0) {
+      const COL = [
+        { label: "Description",    x: M,       w: 85 },
+        { label: "Quantité",       x: M + 85,  w: 25 },
+        { label: "Prix unit. HT",  x: M + 110, w: 35 },
+        { label: "Total HT",       x: M + 145, w: 25 },
+      ];
+
+      // Header row
+      doc.setFillColor(...PRIMARY);
+      doc.rect(M, y - 5, cw, 8, "F");
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      COL.forEach((c) => doc.text(c.label, c.x + 2, y));
+      y += 6;
+
+      // Data rows
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...BLACK);
+      lignes.forEach((l, i) => {
+        if (i % 2 === 0) {
+          doc.setFillColor(250, 246, 246);
+          doc.rect(M, y - 4, cw, 7, "F");
+        }
+        const total = (parseFloat(l.quantite ?? 1) * parseFloat(l.prix_unitaire ?? 0)).toFixed(2);
+        doc.text(String(l.description || ""), COL[0].x + 2, y);
+        doc.text(String(l.quantite ?? 1),    COL[1].x + 2, y);
+        doc.text(`${parseFloat(l.prix_unitaire ?? 0).toFixed(2)} €`, COL[2].x + 2, y);
+        doc.text(`${total} €`, COL[3].x + 2, y);
+        y += 7;
+      });
+
+      y += 5;
+    }
+
+    // ── Totals (right-aligned) ───────────────────────────
+    const TX = pw - M - 65; // totals label x
+    doc.setFontSize(10);
+    doc.setTextColor(...BLACK);
+
+    doc.setFont("helvetica", "normal");
+    doc.text("Montant HT :", TX, y);
+    doc.text(`${parseFloat(full.montant_ht ?? 0).toFixed(2)} €`, pw - M, y, { align: "right" });
+
+    y += 7;
+    doc.text(`TVA (${full.tva ?? 0} %) :`, TX, y);
+    doc.text(`${parseFloat(full.montant_tva ?? 0).toFixed(2)} €`, pw - M, y, { align: "right" });
+
+    y += 3;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(TX, y, pw - M, y);
+    y += 6;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...PRIMARY);
+    doc.text("Total TTC :", TX, y);
+    doc.text(`${parseFloat(full.montant_ttc ?? 0).toFixed(2)} €`, pw - M, y, { align: "right" });
+
+    // ── Footer ──────────────────────────────────────────
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY);
+    doc.text(
+      "ADL Toiture — Brabant wallon — admin@adltoiture.be",
+      pw / 2,
+      ph - 10,
+      { align: "center" }
+    );
+
+    // ── Save ────────────────────────────────────────────
+    const slug = (full.client_nom || "client").replace(/\s+/g, "-");
+    doc.save(`devis-${full.id}-${slug}.pdf`);
   }
 
   async function handleStatusChange(devis, statut) {
