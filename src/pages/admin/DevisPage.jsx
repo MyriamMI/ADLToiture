@@ -572,7 +572,8 @@ export default function DevisPage() {
     try {
       await updateDevis(devis.id, { ...devis, statut });
     } catch {
-      /* API indisponible */
+      alert("Une erreur est survenue, veuillez réessayer.");
+      return;
     }
     setDevisList((prev) =>
       prev.map((d) => (d.id === devis.id ? { ...d, statut } : d)),
