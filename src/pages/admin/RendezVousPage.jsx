@@ -21,7 +21,6 @@ function ActionMenu({ row, openMenu, setOpenMenu, onEdit, onDelete }) {
     a.click()
     URL.revokeObjectURL(url)
     setOpenMenu(null)
-    console.log(row);
   }
 
   useEffect(() => {
@@ -69,11 +68,6 @@ function ActionMenu({ row, openMenu, setOpenMenu, onEdit, onDelete }) {
     </div>
   )
 }
-
-const SERVICES_LIST = [
-  'Rénovation toiture', 'Pose neuve', 'Zinguerie', 'Isolation combles',
-  'Nettoyage toiture', 'Réparation urgence', 'Inspection toiture', 'Traitement hydrofuge',
-]
 
 const STATUS_LABEL = {
   en_attente: 'En attente',

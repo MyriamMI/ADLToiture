@@ -152,19 +152,18 @@ class ClientsController
 
     /** DELETE /clients/{id} — soft delete (hides client, keeps history). */
     public function delete(int $id): void
-    {
-        checkAuth();
+{
+    checkAuth();
 
-        // Soft delete — keeps data for history, just hides the client
-        $stmt = $this->db->prepare('UPDATE clients SET actif = 0 WHERE id = ? AND actif = 1');
-        $stmt->execute([$id]);
+    $stmt = $this->db->prepare("UPDATE clients SET nom = 'Client anonymisé', telephone = NULL, email = NULL, adresse = NULL, ville = NULL, actif = 0 WHERE id = ?");
+    $stmt->execute([$id]);
 
-        if ($stmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['error' => 'Client not found']);
-            return;
-        }
-
-        echo json_encode(['success' => true]);
+    if ($stmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Client not found']);
+        return;
     }
+
+    echo json_encode(['message' => 'Client data anonymized successfully (RGPD)']);
+}
 }

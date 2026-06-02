@@ -91,21 +91,30 @@ function calcSousTotal(lignes) {
 /* ══════════════════════════════════════════
    Dropdown action menu — positionnement fixe (getBoundingClientRect)
 ══════════════════════════════════════════ */
-function DevisActionMenu({ devis, openMenu, setOpenMenu, onEdit, onDelete, onGeneratePDF, onStatusChange }) {
-  const isOpen = openMenu === devis.id
-  const btnRef = useRef(null)
-  const [dropPos, setDropPos] = useState({ top: 0, left: 0 })
+function DevisActionMenu({
+  devis,
+  openMenu,
+  setOpenMenu,
+  onEdit,
+  onDelete,
+  onGeneratePDF,
+  onStatusChange,
+}) {
+  const isOpen = openMenu === devis.id;
+  const btnRef = useRef(null);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
     if (isOpen && btnRef.current) {
-      const rect            = btnRef.current.getBoundingClientRect()
-      const estimatedHeight = 120
-      const top = rect.bottom + 4 + estimatedHeight > window.innerHeight
-        ? rect.top - estimatedHeight - 4
-        : rect.bottom + 4
-      setDropPos({ top, left: rect.right - 160 })
+      const rect = btnRef.current.getBoundingClientRect();
+      const estimatedHeight = 120;
+      const top =
+        rect.bottom + 4 + estimatedHeight > window.innerHeight
+          ? rect.top - estimatedHeight - 4
+          : rect.bottom + 4;
+      setDropPos({ top, left: rect.right - 160 });
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   return (
     <div className="dv-menu-wrap">
@@ -115,32 +124,78 @@ function DevisActionMenu({ devis, openMenu, setOpenMenu, onEdit, onDelete, onGen
         aria-label={`Actions pour ${devis.client_nom}`}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        onClick={(e) => { e.stopPropagation(); setOpenMenu((prev) => prev === devis.id ? null : devis.id); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenMenu((prev) => (prev === devis.id ? null : devis.id));
+        }}
       >
         <i className="fas fa-ellipsis-v"></i>
       </button>
 
       {isOpen && (
-        <div className="dv-dropdown" role="menu" style={{ position: 'fixed', top: dropPos.top, left: dropPos.left }}>
+        <div
+          className="dv-dropdown"
+          role="menu"
+          style={{ position: "fixed", top: dropPos.top, left: dropPos.left }}
+        >
+          <button
+            className="dv-dropdown__item"
+            role="menuitem"
+            onClick={() => {
+              onEdit(devis);
+              setOpenMenu(null);
+            }}
+          >
+            <i className="fas fa-pen"></i> Modifier
+          </button>
+          <button
+            className="dv-dropdown__item"
+            role="menuitem"
+            onClick={() => onGeneratePDF(devis)}
+          >
+            <i className="fas fa-file-pdf"></i> Générer PDF
+          </button>
           {devis.statut !== "accepte" && (
-            <button className="dv-dropdown__item" role="menuitem" onClick={() => onStatusChange(devis, "accepte")}>
+            <button
+              className="dv-dropdown__item"
+              role="menuitem"
+              onClick={() => onStatusChange(devis, "accepte")}
+            >
               <i className="fas fa-check"></i> Accepté
             </button>
           )}
           {devis.statut !== "refuse" && (
-            <button className="dv-dropdown__item dv-dropdown__item--danger" role="menuitem" onClick={() => onStatusChange(devis, "refuse")}>
+            <button
+              className="dv-dropdown__item dv-dropdown__item--danger"
+              role="menuitem"
+              onClick={() => onStatusChange(devis, "refuse")}
+            >
               <i className="fas fa-ban"></i> Refusé
             </button>
           )}
           {devis.statut !== "brouillon" && (
-            <button className="dv-dropdown__item" role="menuitem" onClick={() => onStatusChange(devis, "brouillon")}>
+            <button
+              className="dv-dropdown__item"
+              role="menuitem"
+              onClick={() => onStatusChange(devis, "brouillon")}
+            >
               <i className="fas fa-undo"></i> Brouillon
             </button>
           )}
+          <button
+            className="dv-dropdown__item dv-dropdown__item--danger"
+            role="menuitem"
+            onClick={() => {
+              if (window.confirm("Supprimer ce devis définitivement ?"))
+                onDelete(devis.id);
+            }}
+          >
+            <i className="fas fa-trash"></i> Supprimer
+          </button>
         </div>
       )}
     </div>
-  )
+  );
 }
 
 /* ══════════════════════════════════════════
@@ -163,7 +218,6 @@ export default function DevisPage() {
   useEffect(() => {
     Promise.all([getDevis(), getClients()])
       .then(([devis, cli]) => {
-        console.log(devis);
         setDevisList(devis);
         setClients(cli);
       })
@@ -278,7 +332,6 @@ export default function DevisPage() {
 
   async function handleCreate(e) {
     e.preventDefault();
-    console.log('[handleCreate] client_id:', formData.client_id, '| lignes:', formData.lignes)
     const payload = {
       client_id: parseInt(formData.client_id, 10),
       service: formData.lignes[0]?.description || "Divers",
@@ -309,21 +362,25 @@ export default function DevisPage() {
       const updated = await getDevis();
       setDevisList(updated);
     } catch {
-      // silencieux
+      alert("Une erreur est survenue, veuillez réessayer.");
+      return;
     }
     closeModal();
   }
 
   async function handleUpdate(e) {
     e.preventDefault();
-    const currentStatut = modal.devis?.statut ?? 'brouillon'
-    const autoStatut = formData.client_id &&
-      formData.lignes.some((l) => l.description.trim() !== "" && l.prix_unitaire > 0)
+    const currentStatut = modal.devis?.statut ?? "brouillon";
+    const autoStatut =
+      formData.client_id &&
+      formData.lignes.some(
+        (l) => l.description.trim() !== "" && l.prix_unitaire > 0,
+      )
         ? "en_attente"
-        : "brouillon"
-    const newStatut = ['brouillon', 'en_attente'].includes(currentStatut)
+        : "brouillon";
+    const newStatut = ["brouillon", "en_attente"].includes(currentStatut)
       ? autoStatut
-      : currentStatut
+      : currentStatut;
     const payload = {
       client_id: parseInt(formData.client_id, 10),
       service: formData.lignes[0]?.description || modal.devis.service,
@@ -344,7 +401,8 @@ export default function DevisPage() {
     try {
       await updateDevis(modal.devis.id, payload);
     } catch {
-      /* API indisponible */
+      alert("Une erreur est survenue, veuillez réessayer.");
+      return;
     }
     setDevisList((prev) =>
       prev.map((d) => (d.id === modal.devis.id ? { ...d, ...payload } : d)),
@@ -356,21 +414,27 @@ export default function DevisPage() {
     try {
       await deleteDevis(id);
     } catch {
-      /* API indisponible */
+      alert("Une erreur est survenue, veuillez réessayer.");
+      return;
     }
     setDevisList((prev) => prev.filter((d) => d.id !== id));
     setOpenMenu(null);
   }
 
   function handleGeneratePDF(devis) {
-    console.info("Génération PDF pour :", devis.client_nom, devis.id);
     setOpenMenu(null);
   }
 
   async function handleStatusChange(devis, statut) {
-    try { await updateDevis(devis.id, { ...devis, statut }) } catch { /* API indisponible */ }
-    setDevisList((prev) => prev.map((d) => d.id === devis.id ? { ...d, statut } : d))
-    setOpenMenu(null)
+    try {
+      await updateDevis(devis.id, { ...devis, statut });
+    } catch {
+      /* API indisponible */
+    }
+    setDevisList((prev) =>
+      prev.map((d) => (d.id === devis.id ? { ...d, statut } : d)),
+    );
+    setOpenMenu(null);
   }
 
   /* ── Rendu ── */
@@ -475,9 +539,10 @@ export default function DevisPage() {
 
                     <td>
                       <span
-                        className={`status-badge ${statusClass(devis.statut ?? 'brouillon')}`}
+                        className={`status-badge ${statusClass(devis.statut ?? "brouillon")}`}
                       >
-                        {STATUS_LABEL[devis.statut ?? 'brouillon'] ?? 'Brouillon'}
+                        {STATUS_LABEL[devis.statut ?? "brouillon"] ??
+                          "Brouillon"}
                       </span>
                     </td>
 
@@ -512,8 +577,12 @@ export default function DevisPage() {
                       {getInitials(devis.client_nom)}
                     </span>
                     <div className="dv-mobile-card__info">
-                      <span className="dv-mobile-card__name">{devis.client_nom}</span>
-                      <span className="dv-mobile-card__service">{devis.service}</span>
+                      <span className="dv-mobile-card__name">
+                        {devis.client_nom}
+                      </span>
+                      <span className="dv-mobile-card__service">
+                        {devis.service}
+                      </span>
                     </div>
                   </div>
                   <div className="dv-mobile-card__date">
@@ -522,8 +591,10 @@ export default function DevisPage() {
                   </div>
                 </div>
                 <div className="dv-mobile-card__right">
-                  <span className={`status-badge ${statusClass(devis.statut ?? 'brouillon')}`}>
-                    {STATUS_LABEL[devis.statut ?? 'brouillon'] ?? 'Brouillon'}
+                  <span
+                    className={`status-badge ${statusClass(devis.statut ?? "brouillon")}`}
+                  >
+                    {STATUS_LABEL[devis.statut ?? "brouillon"] ?? "Brouillon"}
                   </span>
                   <div className="dv-mobile-card__footer">
                     <span className="dv-mobile-card__amount">

@@ -26,10 +26,9 @@ class StatsController
             $stmt = $this->db->query($sql);
             return $stmt;
         } catch (\Throwable $e) {
-            $msg = "[StatsController::$label] " . $e->getMessage();
-            error_log($msg);
+            error_log("[StatsController::$label] " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => $msg]);
+            echo json_encode(['error' => 'Statistics unavailable']);
             exit;
         }
     }

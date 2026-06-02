@@ -106,6 +106,12 @@ class DevisController
     {
         checkAuth();
 
+        if (empty($data['client_id']) || empty($data['service'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Fields client_id and service are required']);
+            return;
+        }
+
         $stmt = $this->db->prepare(
             'UPDATE devis
              SET client_id = ?, service = ?, statut = ?, date_envoi = ?, date_reponse = ?,
