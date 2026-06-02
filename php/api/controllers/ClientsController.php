@@ -76,12 +76,18 @@ class ClientsController
     {
         checkAuth();
 
-        foreach (['nom', 'telephone', 'ville'] as $field) {
+        foreach (['nom', 'ville'] as $field) {
             if (empty($data[$field])) {
                 http_response_code(400);
                 echo json_encode(['error' => "Field '{$field}' is required"]);
                 return;
             }
+        }
+
+        if (empty($data['telephone']) && empty($data['email'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'At least a phone number or email is required']);
+            return;
         }
 
         if ($this->isDuplicate($data['telephone'] ?? '', $data['email'] ?? '')) {

@@ -146,7 +146,6 @@ export default function DemandesPage() {
   async function handleStatut(id, statut) {
     setOpenMenu(null)
     try {
-      console.log('[DemandesPage] handleStatut →', { id, typeId: typeof id, statut })
       await updateDemandeStatut(id, statut)
       setDemandes((prev) =>
         prev.map((d) => (d.id === id ? { ...d, statut } : d))
@@ -395,6 +394,12 @@ export default function DemandesPage() {
                   <span className="dm-info-label">Service</span>
                   <span className="dm-info-value">{modal.service}</span>
                 </div>
+                {modal.email && (
+                  <div className="dm-info-item">
+                    <span className="dm-info-label">Email</span>
+                    <span className="dm-info-value">{modal.email}</span>
+                  </div>
+                )}
               </div>
 
               <hr className="dm-modal__divider" />

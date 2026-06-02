@@ -109,8 +109,10 @@ function statusClass(statut) {
 }
 
 function formatDate(iso) {
-  if (!iso) return '—'
-  return new Date(iso.replace(' ', 'T')).toLocaleDateString('fr-BE', {
+  if (!iso || iso.startsWith('0000')) return '—'
+  const d = new Date(iso.replace(' ', 'T'))
+  if (isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('fr-BE', {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 }
