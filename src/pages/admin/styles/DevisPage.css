@@ -904,7 +904,7 @@
 }
 
 /* ── Bascule tableau ↔ cards sur mobile ── */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
   .dv-table-wrap {
     display: none;
   }

@@ -642,7 +642,7 @@
 }
 
 /* ── Mobile ── */
-@media (max-width: 640px) {
+@media (max-width: 880px) {
   .rdv-page {
     padding: 1.25rem 1rem;
   }

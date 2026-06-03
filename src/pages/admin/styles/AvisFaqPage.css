@@ -578,13 +578,64 @@
   padding: 1rem 0;
 }
 
+/* ── Cards mobiles FAQ (masquées sur desktop) ── */
+.af-faq-mobile-cards {
+  display: none;
+}
+
+.af-faq-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 0.875rem 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.af-faq-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.af-faq-card__question {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.af-faq-card__reponse {
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.55);
+  margin: 0;
+  line-height: 1.5;
+}
+
 /* ── Bascule tableau ↔ cards avis sur mobile ── */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
   .af-section:first-child .af-table-wrap {
     display: none;
   }
 
   .af-avis-mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 12px 0;
+  }
+}
+
+/* ── Bascule tableau ↔ cards FAQ sur mobile ── */
+@media (max-width: 880px) {
+  .af-section:last-child .af-table-wrap {
+    display: none;
+  }
+
+  .af-faq-mobile-cards {
     display: flex;
     flex-direction: column;
     gap: 12px;

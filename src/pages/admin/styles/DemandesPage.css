@@ -38,11 +38,6 @@
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   overflow: visible;
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .dm-table-card { display: block; }
 }
 
 .dm-table-wrap {
@@ -189,13 +184,17 @@
    Cartes — mobile
 ══════════════════════════════ */
 .dm-cards {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-@media (min-width: 768px) {
-  .dm-cards { display: none; }
+/* ── Bascule tableau ↔ cards ── */
+@media (max-width: 960px) {
+  .dm-table-card { display: none; }
+  .dm-cards {
+    display: flex;
+  }
 }
 
 .dm-card {
@@ -212,6 +211,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dm-card__head-right {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
 }
 

@@ -498,7 +498,7 @@
 }
 
 /* ── Bascule tableau ↔ cards sur mobile ── */
-@media (max-width: 768px) {
+@media (max-width: 880px) {
   .dashboard__table-wrap {
     display: none;
   }

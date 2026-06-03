@@ -482,6 +482,41 @@ export default function AvisFaqPage() {
           </button>
         </div>
 
+        {/* ── Cards mobiles FAQ ── */}
+        <div className="af-faq-mobile-cards">
+          {faqList.length === 0 ? (
+            <p className="af-mobile-empty">Aucune question — cliquez « + Ajouter » pour en créer une.</p>
+          ) : (
+            faqList.map((faq) => (
+              <div key={faq.id} className="af-faq-card">
+                <div className="af-faq-card__header">
+                  <span className={`af-cat-badge af-cat-badge--${faq.categorie.toLowerCase()}`}>
+                    {faq.categorie}
+                  </span>
+                  <div className="af-actions">
+                    <button
+                      className="af-action-btn af-action-btn--edit"
+                      title="Modifier"
+                      onClick={() => openFaqEdit(faq)}
+                    >
+                      <i className="fas fa-pen"></i>
+                    </button>
+                    <button
+                      className="af-action-btn af-action-btn--delete"
+                      title="Supprimer"
+                      onClick={() => handleSupprimerFaq(faq.id)}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <p className="af-faq-card__question">{faq.question}</p>
+                <p className="af-faq-card__reponse">{truncate(faq.reponse, 120)}</p>
+              </div>
+            ))
+          )}
+        </div>
+
         {/* Tableau FAQ */}
         <div className="af-table-wrap">
           <table className="af-table af-table--faq">
