@@ -1,41 +1,60 @@
 # ADLToiture
 
-Application web de gestion pour un couvreur professionnel, développée dans le cadre du Travail de Fin d'Études IFAPME Développeur Web Front-End (X75) — Année 2025-2026.
+Application web de gestion pour un artisan couvreur, développée dans le cadre du Travail de Fin d'Études IFAPME Développeur Web Front-End (X75) — Année 2025-2026.
 
 ## Description
 
-ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon (Belgique). Ce projet est une application web SPA permettant de :
-- Présenter les services de l'entreprise au public
-- Recevoir des demandes de rendez-vous en ligne
-- Gérer les rendez-vous, clients et devis via un espace admin privé
+ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon (Belgique). Ce projet est une application web SPA composée de deux parties :
 
-> Projet fictif fonctionnel basé sur une entreprise réelle, développé en anticipation de sa reprise d'activité.
+- **Site public** : vitrine de l'entreprise, formulaire de demande de devis, avis clients, FAQ et carte interactive
+- **Espace admin** : gestion complète des demandes, rendez-vous, clients, devis, avis et statistiques
 
-## Avancement
-
-| Étape | Statut |
-|-------|--------|
-| Cahier des charges | ✅ Terminé |
-| Maquettes Desktop 1440px — 10 pages | ✅ Terminé |
-| Maquettes iPad paysage 1024px — 10 pages | ✅ Terminé |
-| Maquettes Mobile 390px — 15 frames | ✅ Terminé |
-| Prototypage Figma (navigation) | ✅ Terminé |
-| Développement back-end PHP + MySQL | ⏳ À venir |
-| Développement front-end React | 🔄 En cours |
-| Tests & déploiement | ⏳ À venir |
-
-## Maquettes Figma
-[Voir les maquettes sur Figma](https://www.figma.com/design/6qH3UsrKONycCrwY0e8kcF)
+Projet fonctionnel basé sur une vraie entreprise, développé en anticipation de sa reprise d'activité.
 
 ## Stack technique
 
 | Couche | Technologie |
 |--------|-------------|
-| Front-end | React.js + Vite + CSS custom properties |
-| Back-end | PHP (API REST) |
-| Base de données | MySQL |
+| Front-end | React.js + Vite + CSS personnalisé mobile-first |
+| Back-end | PHP OOP (API REST — 38 endpoints) |
+| Base de données | MySQL (9 tables) |
+| Authentification | JWT (JSON Web Token) |
 | Carte | Leaflet.js + OpenStreetMap |
-| Auth | JWT |
+| Graphiques | Recharts |
+| PDF | jsPDF |
+
+## Fonctionnalités
+
+- Formulaire de demande de devis avec consentement RGPD
+- Espace admin sécurisé par JWT
+- Gestion des demandes, RDV, clients, devis avec statuts
+- Export iCal (.ics) compatible Google Calendar / Outlook
+- Génération PDF des devis
+- Anonymisation RGPD des clients (soft delete)
+- Statistiques graphiques (Recharts)
+- FAQ dynamique connectée à l'API
+
+## Démo en ligne
+
+[adltoiture.alwaysdata.net](https://adltoiture.alwaysdata.net)
+
+## Installation
+
+```bash
+# Cloner le repo
+git clone https://github.com/MyriamMI/ADLToiture.git
+cd ADLToiture
+
+# Installer les dépendances front-end
+npm install
+npm run dev
+
+# Configurer le back-end
+# Copier php/.env.example en php/.env et remplir les infos de connexion
+
+# Importer la base de données
+mysql -u root -p < php/database/adltoiture.sql
+```
 
 ## Prérequis
 
@@ -44,31 +63,12 @@ ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon
 - MySQL 8+
 - WAMP (en local)
 
-## Installation
+## Maquettes Figma
 
-```bash
-# Cloner le repo
-git clone https://github.com/MyriamMi/ADLToiture.git
-cd ADLToiture
-
-# Installer les dépendances front-end
-cd ADLToiture
-npm install
-npm run dev
-
-# Configurer le back-end
-cd ../server
-cp config.example.php config.php
-# Remplir les infos de connexion MySQL dans config.php
-
-# Importer la base de données
-mysql -u root -p < database/adltoiture.sql
-```
-
-## Structure du projet
+[Voir les maquettes sur Figma](#)
 
 ## Auteur
 
-**Myriam Mi** — [@MyriamMi](https://github.com/MyriamMi)  
+Myriam Micollier — [@MyriamMI](https://github.com/MyriamMI)  
 Formation : IFAPME Développeur Web Front-End — Section X75  
 Formateur : Mohamad Haji | Année 2025-2026
