@@ -11,8 +11,9 @@ build/
 # Environment variables
 .env
 
-# Database dumps
+# Database dumps — ignore data exports, allow schema
 *.sql
+!php/database/adltoiture.sql
 .env.local
 .env.development.local
 .env.test.local
