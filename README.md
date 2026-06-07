@@ -42,7 +42,6 @@ ADL Toiture est une entreprise artisanale de couverture basée en Brabant wallon
 | Génération PDF | jsPDF |
 | Export calendrier | iCal (avec JWT sécurisé) |
 | Hébergement | Alwaysdata (PHP + MySQL + build React) |
-| Images | Cloudinary |
 
 ## Fonctionnalités principales
 
