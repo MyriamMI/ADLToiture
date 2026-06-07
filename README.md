@@ -142,5 +142,4 @@ La base de données MySQL est gérée depuis le panel Alwaysdata.
 
 **Myriam Mi** — [@MyriamMi](https://github.com/MyriamMi)  
 Formation : IFAPME Développeur Web Front-End — Section X75  
-Formateur : Mohamad Haji | Année 2025-2026  
-Assistance IA : Claude (Anthropic) — utilisé comme outil d'aide au développement et à la documentation
+Formateur : Mohamad Haji | Année 2025-2026
